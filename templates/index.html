@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% block title %}
+Главная
+{% endblock %}
+
+{% block main %}
+     
+      <section class="hero-section bg-primary text-white p-5">
+        <div class="container py-4">
+          <div class="row align-items-center">
+            <div class="col-lg-6">
+              <h1 class="display-4 fw-bold mb-4">
+                Освой JavaScript с нуля до профессионала
+              </h1>
+              <p class="lead mb-4">
+                Интерактивный самоучитель с практическими заданиями, который
+                поможет вам стать разработчиком
+              </p>
+              <div class="d-grid gap-3 d-sm-flex">
+                <a href="/lessons" class="btn btn-light btn-lg px-4"
+                  >Начать обучение</a
+                >
+                <a href="#features" class="btn btn-outline-light btn-lg px-4"
+                  >Узнать больше</a
+                >
+              </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+              <img
+                src="../static/img/code.jpg"
+                alt="JavaScript код"
+                class="img-fluid rounded shadow"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Основные преимущества -->
+      <section id="features" class="py-5 bg-light">
+        <div class="container">
+          <div class="text-center mb-5">
+            <h2 class="fw-bold">Почему выбирают наш самоучитель</h2>
+            <p class="lead text-muted">6 причин начать обучение прямо сейчас</p>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div
+                    class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style="width: 64px; height: 64px"
+                  >
+                    <i class="bi bi-laptop" style="font-size: 1.5rem"></i>
+                  </div>
+                  <h4 class="mb-3">Практика в браузере</h4>
+                  <p class="text-muted">
+                    Встроенный редактор кода с мгновенным выполнением и
+                    проверкой заданий без необходимости установки дополнительных
+                    программ
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div
+                    class="feature-icon bg-success bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style="width: 64px; height: 64px"
+                  >
+                    <i
+                      class="bi bi-journal-check"
+                      style="font-size: 1.5rem"
+                    ></i>
+                  </div>
+                  <h4 class="mb-3">Пошаговая система</h4>
+                  <p class="text-muted">
+                    Продуманная программа обучения от основ до продвинутых
+                    концепций с постепенным увеличением сложности
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div
+                    class="feature-icon bg-info bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style="width: 64px; height: 64px"
+                  >
+                    <i class="bi bi-lightbulb" style="font-size: 1.5rem"></i>
+                  </div>
+                  <h4 class="mb-3">Реальные проекты</h4>
+                  <p class="text-muted">
+                    Создавайте настоящие приложения в процессе обучения и
+                    пополняйте свое портфолио
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div
+                    class="feature-icon bg-warning bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style="width: 64px; height: 64px"
+                  >
+                    <i class="bi bi-people" style="font-size: 1.5rem"></i>
+                  </div>
+                  <h4 class="mb-3">Сообщество</h4>
+                  <p class="text-muted">
+                    Общайтесь с другими учениками, задавайте вопросы и получайте
+                    помощь от более опытных разработчиков
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div
+                    class="feature-icon bg-danger bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style="width: 64px; height: 64px"
+                  >
+                    <i class="bi bi-graph-up" style="font-size: 1.5rem"></i>
+                  </div>
+                  <h4 class="mb-3">Гарантия прогресса обучения</h4>
+                  <p class="text-muted">
+                    Гаранируем повышение навыков написания кода на JavaScript
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                  <div
+                    class="feature-icon bg-dark bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style="width: 64px; height: 64px"
+                  >
+                    <i class="bi bi-phone" style="font-size: 1.5rem"></i>
+                  </div>
+                  <h4 class="mb-3">Мобильное обучение</h4>
+                  <p class="text-muted">
+                    Доступ к урокам с любого устройства - учитесь когда и где
+                    удобно
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Упрощенная программа обучения -->
+      <section class="py-5">
+        <div class="container">
+          <div class="text-center mb-5">
+            <h2 class="fw-bold">Программа обучения</h2>
+            <p class="lead text-muted">
+              Пошаговый путь от основ до реальных проектов
+            </p>
+          </div>
+          <div class="row g-4 text-center">
+            <!-- Блок 1 -->
+            <div class="col-md-4">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <a href="/lesson">Привет, мир!</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Структура кода</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Строгий режим — "use strict"</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Переменные</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Типы данных</a>
+                </li>
+              </ul>
+            </div>
+            <!-- Блок 2 -->
+            <div class="col-md-4">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <a href="/lesson">Преобразование типов</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Базовые операторы, математика</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Операторы сравнения</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Условное ветвление: if, '?'</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Логические операторы</a>
+                </li>
+              </ul>
+            </div>
+            <!-- Блок 3 -->
+            <div class="col-md-4">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <a href="/lesson">Циклы while и for</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Конструкция "switch"</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Функции</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Function Expression</a>
+                </li>
+                <li class="list-group-item">
+                  <a href="/lesson">Стрелочные функции, основы</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="text-center mt-5">
+            <a href="/lessons" class="btn btn-primary btn-lg"
+              >Посмотреть все уроки</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- Отзывы -->
+      <section class="py-5 bg-light">
+        <div class="container">
+          <div class="text-center mb-5">
+            <h2 class="fw-bold">Отзывы наших студентов</h2>
+            <p class="lead text-muted">
+              Что говорят те, кто уже прошел обучение
+            </p>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="card h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <img
+                      src="../static/img/1.jpg"
+                      class="rounded-circle me-3"
+                      alt="Аватар"
+                      width="100%"
+                    />
+                  </div>
+                  <div>
+                    <h5 class="mb-1">Алексей Петров</h5>
+                </div>
+                  <p class="card-text">
+                    "Отличный курс для начинающих! Все объясняется понятным
+                    языком, много практики. После завершения смог устроиться на
+                    первую работу фронтенд-разработчиком."
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <img
+                      src="../static/img/3.jpg"
+                      class="rounded-circle me-3"
+                      alt="Аватар"
+                      width="100%"
+                    />
+                  </div>
+                  <div>
+                    <h5 class="mb-1">Елена Смирнова</h5>
+                </div>
+                  <p class="card-text">
+                    "Очень понравилась система обучения - можно сразу применять
+                    знания на практике. Интересные задания, которые
+                    действительно помогают разобраться в теме."
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <img
+                      src="../static/img/2.jpg"
+                      class="rounded-circle me-3"
+                      alt="Аватар"
+                      width="100%"
+                    />
+                  </div>
+                  <div>
+                    <h5 class="mb-1">Дмитрий Иванов</h5>
+                </div>
+                  <p class="card-text">
+                    "Хорошая структура курса. Особенно полезны реальные проекты
+                    в конце - они помогают понять, как все работает вместе.
+                    Рекомендую всем, кто хочет изучить JavaScript."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Статистика -->
+      <section class="py-5 bg-primary text-white">
+        <div class="container">
+          <div class="row text-center">
+            <div class="col">
+              <div class="display-5 fw-bold">
+                Более 1000 довольных студентов
+              </div>
+              <p class="mb-0">
+                Присоединяйтесь к их числу и становитесь JavaScript
+                разработчиками!
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Призыв к действию -->
+      <section class="py-5">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+              <h2 class="fw-bold mb-4">Готовы начать обучение?</h2>
+              <p class="lead mb-4">
+                Присоединяйтесь к тысячам студентов, которые уже освоили
+                JavaScript с нашим самоучителем
+              </p>
+              <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="/auth" class="btn btn-primary btn-lg px-4"
+                  >Зарегистрироваться</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endblock %}
