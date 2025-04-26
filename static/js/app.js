@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
 
                 // Получаем данные с сервера (правильное решение)
-                const response = await fetch(`http://127.0.0.1:5000/api/lesson/${idLesson.value}`);
+                const response = await fetch(`https://learn-js-6ml6.onrender.com/api/lesson/${idLesson.value}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Отправляем решение пользователя на сервер для сохранения
-                const saveResponse = await fetch('http://127.0.0.1:5000/api/save-solution', {
+                const saveResponse = await fetch('https://learn-js-6ml6.onrender.com/api/save-solution', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
