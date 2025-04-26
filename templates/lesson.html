@@ -7,12 +7,25 @@
 {{ ckeditor.load() }}
         <div class="row">
             <div class="col-lg-10 mx-auto">
+              {%if existing_solution.is_correct%}
+                <div class="container">
+                  <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                      Этот урок был пройден!
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+              </div>
+          
+
+                {%endif%}
+
+
                 <nav aria-label="breadcrumb" class="mb-4">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/lessons">Все уроки</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{less.title}}</li>
                     </ol>
                 </nav>
+                {%if 'name' in session and active_user.root==1%}
                 <button
                 type="button"
                 class="btn btn-primary mb-3"
@@ -64,10 +77,10 @@
                   </div>
                 </div>
               </div>
-                
+              {%endif%}
                 <h1 class="mb-4">{{less.title}}</h1>
                 <p>{{less.description}}</p>
-                <p></p>
+                
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">Теория</h5>

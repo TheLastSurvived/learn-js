@@ -68,7 +68,8 @@ class UserSolution(db.Model):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("index.html")
+    lesson = Lesson.query.limit(3).all()
+    return render_template("index.html",lesson=lesson)
 
 
 @app.route('/about', methods=['GET', 'POST'])
@@ -135,6 +136,10 @@ def lessons():
 
 @app.route('/lesson/<int:id>', methods=['GET', 'POST'])
 def lesson(id):
+    if not 'name' in session:
+        flash("Для продолжения  необходимо войти!", category="success")
+        return redirect('/auth')
+
     less = Lesson.query.get(id)
     count = Lesson.query.count()
     # Получаем предыдущий урок

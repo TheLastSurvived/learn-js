@@ -168,66 +168,34 @@
               Пошаговый путь от основ до реальных проектов
             </p>
           </div>
-          <div class="row g-4 text-center">
-            <!-- Блок 1 -->
-            <div class="col-md-4">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                  <a href="/lesson">Привет, мир!</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Структура кода</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Строгий режим — "use strict"</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Переменные</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Типы данных</a>
-                </li>
-              </ul>
-            </div>
-            <!-- Блок 2 -->
-            <div class="col-md-4">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                  <a href="/lesson">Преобразование типов</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Базовые операторы, математика</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Операторы сравнения</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Условное ветвление: if, '?'</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Логические операторы</a>
-                </li>
-              </ul>
-            </div>
-            <!-- Блок 3 -->
-            <div class="col-md-4">
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                  <a href="/lesson">Циклы while и for</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Конструкция "switch"</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Функции</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Function Expression</a>
-                </li>
-                <li class="list-group-item">
-                  <a href="/lesson">Стрелочные функции, основы</a>
-                </li>
-              </ul>
+          <div class="row g-4">
+            <div class="row ">
+              {%for less in lesson%}
+              <div class="col-lg-4">
+                <div class="card border-0 shadow-lg lesson-card">
+                  <div class="card-header bg-gradient-primary  py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h4 class="mb-0">{{less.title}}</h4>
+                      <span class="badge bg-light text-primary">Урок {{loop.index}}</span>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="learning-objectives   rounded mb-4 text-truncate" style="max-height: 200px;">
+                      {{less.description}}
+                    </div>
+                  </div>        
+                  <div class="card-footer bg-transparent border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <a href="/lesson/{{less.id}}" class="btn btn-primary me-2">
+                          <i class="bi bi-play-circle me-1"></i> Перейти
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          {%endfor%}
             </div>
           </div>
           <div class="text-center mt-5">
