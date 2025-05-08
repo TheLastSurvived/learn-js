@@ -142,11 +142,11 @@ def lesson(id):
 
     less = Lesson.query.get(id)
     count = Lesson.query.count()
-    # Получаем предыдущий урок
+    
     prev_lesson = Lesson.query.filter(Lesson.id < id)\
                             .order_by(Lesson.id.desc()).first()
     
-    # Получаем следующий урок
+    
     next_lesson = Lesson.query.filter(Lesson.id > id)\
                             .order_by(Lesson.id.asc()).first()
     
@@ -199,26 +199,22 @@ def get_users(id):
 def save_solution():
     try:
         data = request.get_json()
-        
-        # Проверка обязательных полей
         required_fields = ['user_id', 'lesson_id', 'code', 'is_correct']
+
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Missing required fields"}), 400
 
-        # Поиск существующего решения
         existing_solution = UserSolution.query.filter_by(
             user_id=data['user_id'],
             lesson_id=data['lesson_id']
         ).first()
 
         if existing_solution:
-            # Обновляем существующее решение
             existing_solution.code = data['code']
             existing_solution.is_correct = data['is_correct']
             existing_solution.submitted_at = datetime.now()
             action = "updated"
         else:
-            # Создаем новое решение
             new_solution = UserSolution(
                 user_id=data['user_id'],
                 lesson_id=data['lesson_id'],
@@ -246,9 +242,8 @@ def save_solution():
     
 
 def normalize_code(code):
-    """Нормализует код для сравнения"""
-    code = re.sub(r'\s+', ' ', code)  # Заменяем пробельные символы
-    code = re.sub(r'//.*?\n', '', code)  # Удаляем комментарии
+    code = re.sub(r'\s+', ' ', code) 
+    code = re.sub(r'//.*?\n', '', code)
     return code.strip()
 
 
@@ -256,19 +251,13 @@ def normalize_code(code):
 def profile():
     if not 'name' in session:
         abort(401)
-      # Получаем ID текущего пользователя (предположим, он хранится в сессии)
     user_id = Users.query.filter_by(email=session['name']).first().id
-    
-    # Общее количество уроков
     total_lessons = Lesson.query.count()
-    
-    # Количество пройденных уроков (правильных решений)
     completed_lessons = UserSolution.query.filter_by(
         user_id=user_id,
         is_correct=True
     ).distinct(UserSolution.lesson_id).count()
-    
-    # Рассчитываем процент выполнения
+
     progress_percent = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
 
     return render_template("profile.html",

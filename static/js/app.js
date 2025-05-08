@@ -37,59 +37,70 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checkBtn) {
         checkBtn.addEventListener('click', async function() {
             try {
-
-
-                const normalizeCode = (code) => {
-                    return code
-                        .replace(/\s+/g, ' ')       // Заменяем все пробельные символы на один пробел
-                        .replace(/\/\/.*$/gm, '')  // Удаляем однострочные комментарии
-                        .trim();
-                };
-
-                // Получаем данные с сервера (правильное решение)
-                const response = await fetch(`https://learn-js-6ml6.onrender.com/api/lesson/${idLesson.value}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
+                // Получаем данные урока
+                const response = await fetch(`http://127.0.0.1:5000/api/lesson/${idLesson.value}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const lessonData = await response.json();
                 
-                // Сравниваем решения
-                const isCorrect = normalizeCode(data.solution) === normalizeCode(codeEditor.value);
+                // Подготовка контекста
+                const context = {};
                 
-                // Показываем соответствующее уведомление
-                if (isCorrect) {
-                    dangerAlert.classList.add('d-none');
-                    successAlert.classList.remove('d-none');
-                    successAlert.classList.add('fade-in');
-                } else {
-                    successAlert.classList.add('d-none');
-                    dangerAlert.classList.remove('d-none');
-                    dangerAlert.classList.add('fade-in');
-                }
-                
-                // Отправляем решение пользователя на сервер для сохранения
-                const saveResponse = await fetch('https://learn-js-6ml6.onrender.com/api/save-solution', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_id: idUser.value, // Должен быть определен где-то в вашем коде
-                        lesson_id: idLesson.value, // Или динамически определять текущий урок
-                        code: codeEditor.value,
-                        is_correct: isCorrect
-                    })
-                });
-                
-                if (!saveResponse.ok) {
-                    console.error('Failed to save solution');
+                // Выполняем эталонное решение
+                try {
+                    const solutionFunc = new Function(lessonData.solution + '; return result;');
+                    const expectedResult = solutionFunc.call(context);
+                    
+                    // Выполняем пользовательский код
+                    try {
+                        
+                        const userFunc = new Function(codeEditor.value + '; return result;');
+                        const userResult = userFunc.call(context);
+                        
+                        // Сравниваем результаты
+                        const isCorrect = JSON.stringify(userResult) === JSON.stringify(expectedResult);
+                        
+                        // Показываем результаты
+                        if (isCorrect) {
+                            dangerAlert.classList.add('d-none');
+                            successAlert.classList.remove('d-none');
+                            output.innerHTML = `
+                                <div class="text-success">Ваш результат: ${JSON.stringify(userResult)}</div>
+                                <div class="text-success">Ожидаемый результат: ${JSON.stringify(expectedResult)}</div>
+                            `;
+                        } else {
+                            successAlert.classList.add('d-none');
+                            dangerAlert.classList.remove('d-none');
+                            output.innerHTML = `
+                                <div class="text-danger">Ваш результат: ${JSON.stringify(userResult)}</div>
+                                <div class="text-danger">Ожидаемый результат: ${JSON.stringify(expectedResult)}</div>
+                            `;
+                        }
+                        
+                        // Сохраняем решение
+                        const saveResponse = await fetch('http://127.0.0.1:5000/api/save-solution', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: idUser.value,
+                                lesson_id: idLesson.value,
+                                code: codeEditor.value,
+                                is_correct: isCorrect
+                            })
+                        });
+                        
+                    } catch (userError) {
+                        output.innerHTML = `<div class="text-danger">Ошибка в вашем коде: ${userError.message}</div>`;
+                    }
+                    
+                } catch (solutionError) {
+                    output.innerHTML = `<div class="text-danger">Ошибка в эталонном решении: ${solutionError.message}</div>`;
                 }
                 
             } catch (error) {
                 console.error('Error:', error);
+                output.innerHTML = `<div class="text-danger">Ошибка: ${error.message}</div>`;
             }
             
-            // Прокрутка к сообщению
             successAlert.scrollIntoView({ behavior: 'smooth' });
         });
     }

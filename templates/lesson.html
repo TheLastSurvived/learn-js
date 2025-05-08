@@ -106,9 +106,20 @@
                             <textarea class="form-control font-monospace" id="codeEditor" rows="10" style="font-family: monospace;"></textarea>
                         </div>
                         
-                        <button class="btn btn-primary me-2" id="runCode">
-                            <i class="bi bi-play-fill"></i> Выполнить
-                        </button>
+                        <div>
+                          
+                          <p> <span class="text-danger font-weight-bold">Внимание!</span> Ваш код должен возвращать результат в переменной <code>result</code>.</p>
+                          <p> <b>Пример</b> </p>
+<pre>
+  <code>
+    const a = 5;
+    const b = 10;
+    const result = a + b; // Возвращает 15
+  </code>
+</pre>
+                          
+                        </div>
+                      
                         <button class="btn btn-success" id="checkCode">
                             <i class="bi bi-check-circle-fill"></i> Проверить
                         </button>
