@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-Урок 1
+{{less.title}}
 {% endblock %}
 
 {% block main %}
@@ -164,6 +164,52 @@
                 </div>
             </div>
         </div>
+
+                        <!-- Comments Section -->
+                        <div class="card my-4">
+                          <div class="card-header bg-info text-white">
+                              <h5 class="mb-0">Комментарии</h5>
+                          </div>
+                          <div class="card-body">
+                              <!-- Comment Form -->
+                              {% if 'name' in session %}
+                              <form action="/add-comment/{{less.id}}" method="post" class="mb-4">
+                                  <div class="mb-3">
+                                      <label for="commentContent" class="form-label">Оставить комментарий</label>
+                                      <textarea class="form-control" id="commentContent" name="comment_content" rows="3" required></textarea>
+                                  </div>
+                                  <button type="submit" class="btn btn-primary">Отправить</button>
+                              </form>
+                              {% else %}
+                              <div class="alert alert-info">
+                                  Чтобы оставить комментарий, <a href="/auth">войдите</a> в систему.
+                              </div>
+                              {% endif %}
+                              
+                              <!-- Comments List -->
+                              <div class="comments-list">
+                                  {% for comment in comments %}
+                                  <div class="comment mb-3 border-bottom pb-3">
+                                      <div class="d-flex align-items-center mb-2">
+                                          <img src="../static/img/upload/{{comment.user.avatar}}" 
+                                               class="rounded-circle me-2" 
+                                               width="40" height="40" 
+                                               alt="{{comment.user.name}}">
+                                          <div>
+                                              <strong>{{comment.user.name}} {{comment.user.surname}}</strong>
+                                              <small class="text-muted ms-2">{{comment.created_at.strftime('%d.%m.%Y %H:%M')}}</small>
+                                          </div>
+                                      </div>
+                                      <div class="comment-content">
+                                          {{comment.content}}
+                                      </div>
+                                  </div>
+                                  {% else %}
+                                  <div class="text-muted">Пока нет комментариев. Будьте первым!</div>
+                                  {% endfor %}
+                              </div>
+                          </div>
+                      </div>
         
         <!-- Подключаем библиотеку для подсветки синтаксиса -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">

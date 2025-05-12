@@ -10,6 +10,7 @@ from datetime import datetime
 import uuid
 import re
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
 
 
 app = Flask(__name__)
@@ -21,6 +22,13 @@ app.config['UPLOAD_FOLDER'] = 'static/img/upload'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 db = SQLAlchemy(app)
 ckeditor = CKEditor(app)
+CORS(app)
+
+
+CORS(app, resources={
+    r"/api/*": {"origins": "*"},  
+    r"/lesson/*": {"origins": "*"}
+})
 
 
 class Users(db.Model):
@@ -64,6 +72,51 @@ class UserSolution(db.Model):
     
     def __repr__(self):
             return 'User Solution %r' % self.id
+
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'))
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    
+    user = db.relationship('Users', backref='comments')
+    lesson = db.relationship('Lesson', backref='comments')
+    
+    def __repr__(self):
+        return 'Comment %r' % self.id
+    
+
+class AdminIndex(AdminIndexView):
+    @expose('/', methods=['GET', 'POST'])
+    def index(self):
+        if 'name' in session:
+            user = Users.query.filter_by(email=session['name']).first()
+            if user.root!=1:
+                abort(403)
+            else:
+                return self.render('admin/dashboard_index.html')
+        else:
+            abort(401)
+
+class CommentView(ModelView):
+    column_display_pk = True 
+    column_hide_backrefs = False
+    column_list = [ 'user_id', 'lesson_id', 'content', 'created_at']
+
+
+class SolutionView(ModelView):
+    column_display_pk = True 
+    column_hide_backrefs = False
+    column_list = [ 'user_id', 'lesson_id', 'code', 'submitted_at', 'is_correct']
+
+
+admin = Admin(app, name='JS учебник',index_view=AdminIndex())
+admin.add_view(ModelView(Users, db.session))
+admin.add_view(ModelView(Lesson, db.session))
+admin.add_view(SolutionView(UserSolution, db.session))
+admin.add_view(CommentView(Comment, db.session))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -120,6 +173,21 @@ def regestration():
 @app.route('/lessons', methods=['GET', 'POST'])
 def lessons():
     lesson = Lesson.query.all()
+
+    top_users = db.session.query(
+        Users,
+        db.func.count(UserSolution.lesson_id.distinct()).label('completed_count')
+    ).join(
+        UserSolution, Users.id == UserSolution.user_id
+    ).filter(
+        UserSolution.is_correct == True
+    ).group_by(
+        Users.id
+    ).order_by(
+        db.desc('completed_count')
+    ).limit(5).all()
+
+
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
@@ -131,7 +199,7 @@ def lessons():
         db.session.commit()
         flash("Урок добавлен!", category="success")
         return redirect(url_for("lessons"))
-    return render_template("lessons.html",lesson=lesson)
+    return render_template("lessons.html",lesson=lesson,top_users=top_users)
 
 
 @app.route('/lesson/<int:id>', methods=['GET', 'POST'])
@@ -142,7 +210,7 @@ def lesson(id):
 
     less = Lesson.query.get(id)
     count = Lesson.query.count()
-    
+    comments = Comment.query.filter_by(lesson_id=id).order_by(Comment.created_at.desc()).all()
     prev_lesson = Lesson.query.filter(Lesson.id < id)\
                             .order_by(Lesson.id.desc()).first()
     
@@ -170,7 +238,7 @@ def lesson(id):
         return redirect(url_for("lesson", id=less.id, index=index))
 
     return render_template("lesson.html",less=less,count=count,id=id,prev_lesson=prev_lesson,
-                         next_lesson=next_lesson,existing_solution=existing_solution)
+                         next_lesson=next_lesson,existing_solution=existing_solution,comments=comments)
 
 
 @app.route('/delete-lesson/<int:id>')
@@ -186,13 +254,16 @@ def delete_article(id):
 def get_users(id):
     lesson = Lesson.query.get(id)
     
-    return jsonify({
+    response = jsonify({
         'id': lesson.id,
         'title': lesson.title,
         'content': lesson.content,
         'task': lesson.task,
-        'solution' : lesson.solution
+        'solution': lesson.solution
     })
+    
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @app.route('/api/save-solution', methods=['POST'])
@@ -259,11 +330,11 @@ def profile():
     ).distinct(UserSolution.lesson_id).count()
 
     progress_percent = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
-
+    recent_solutions = UserSolution.query.filter_by(user_id=user_id).join(Lesson).all()
     return render_template("profile.html",
                          progress_percent=progress_percent,
                          completed_lessons=completed_lessons,
-                         total_lessons=total_lessons)
+                         total_lessons=total_lessons,recent_solutions=recent_solutions)
 
 
 @app.route('/edit_profile', methods=['POST'])
@@ -294,6 +365,32 @@ def load_avatar():
         db.session.commit()
         flash("Аватар обновлен!", category="success")
         return redirect(url_for("profile"))
+
+
+@app.route('/add-comment/<int:lesson_id>', methods=['POST'])
+def add_comment(lesson_id):
+    if not 'name' in session:
+        abort(401)
+    
+    content = request.form.get('comment_content')
+    if not content:
+        flash("Комментарий не может быть пустым", "warning")
+        return redirect(url_for('lesson', id=lesson_id))
+    
+    user = Users.query.filter_by(email=session['name']).first()
+    
+    new_comment = Comment(
+        user_id=user.id,
+        lesson_id=lesson_id,
+        content=content
+    )
+    
+    db.session.add(new_comment)
+    db.session.commit()
+    
+    flash("Комментарий добавлен", "success")
+    return redirect(url_for('lesson', id=lesson_id))
+
 
 
 @app.errorhandler(405)
