@@ -1,3 +1,6 @@
+const currentUrl = window.location.host ;
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const idLesson = document.getElementById('idLesson');
     const idUser = document.getElementById('idUser');
@@ -38,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkBtn.addEventListener('click', async function() {
             try {
                 // Получаем данные урока
-                const response = await fetch(`http://127.0.0.1:5000/api/lesson/${idLesson.value}`);
+                const response = await fetch(`http://${currentUrl}/api/lesson/${idLesson.value}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const lessonData = await response.json();
                 
@@ -77,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         
                         // Сохраняем решение
-                        const saveResponse = await fetch('http://127.0.0.1:5000/api/save-solution', {
+                        const saveResponse = await fetch(`http://${currentUrl}/api/save-solution`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
