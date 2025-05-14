@@ -334,7 +334,7 @@ def profile():
     return render_template("profile.html",
                          progress_percent=progress_percent,
                          completed_lessons=completed_lessons,
-                         total_lessons=total_lessons,recent_solutions=recent_solutions)
+                         total_lessons=total_lessons,recent_solutions=recent_solutions, now = datetime.now)
 
 
 @app.route('/edit_profile', methods=['POST'])

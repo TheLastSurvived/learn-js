@@ -41,9 +41,25 @@
                 </div>
                 
                 <div class="mt-4">
-                    <div class="badge bg-primary-light text-primary rounded-pill p-2">
-                        <i class="bi bi-star-fill me-1"></i> Новичок
-                    </div>
+                    {% set days_on_site = (now() - active_user.join_date).days %}
+                    
+                    {% if days_on_site < 30 %}
+                        <div class="badge bg-primary-light text-primary rounded-pill p-2">
+                            <i class="bi bi-star-fill me-1"></i> Новичок
+                        </div>
+                    {% elif 30 <= days_on_site < 180 %}
+                        <div class="badge bg-success-light text-success rounded-pill p-2">
+                            <i class="bi bi-award-fill me-1"></i> Опытный
+                        </div>
+                    {% elif 180 <= days_on_site < 365 %}
+                        <div class="badge bg-warning-light text-warning rounded-pill p-2">
+                            <i class="bi bi-trophy-fill me-1"></i> Ветеран
+                        </div>
+                    {% else %}
+                        <div class="badge bg-danger-light text-danger rounded-pill p-2">
+                            <i class="bi bi-gem-fill me-1"></i> Легенда
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             
