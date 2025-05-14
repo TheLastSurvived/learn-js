@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkBtn.addEventListener('click', async function() {
             try {
                 // Получаем данные урока
-                const response = await fetch(`https://${currentUrl}/api/lesson/${idLesson.value}`);
+                const response = await fetch(`/api/lesson/${idLesson.value}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const lessonData = await response.json();
                 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         
                         // Сохраняем решение
-                        const saveResponse = await fetch(`https://${currentUrl}/api/save-solution`, {
+                        const saveResponse = await fetch(`/api/save-solution`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
