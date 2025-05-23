@@ -5,48 +5,56 @@
 
 {% block main %}
      
-      <section class="hero-section bg-primary text-white p-5">
-        <div class="container py-4">
-          <div class="row align-items-center">
-            <div class="col-lg-6">
-              <h1 class="display-4 fw-bold mb-4">
-                Освой JavaScript с нуля до профессионала
+      <section class="hero-section bg-dark text-white">
+        <div class="container py-5">
+          <div class="row align-items-center py-5">
+            <div class="col-lg-6 py-5 px-3">
+              <h1 class="display-3 fw-bold mb-4 animate__animated animate__fadeInDown">
+                Освой JavaScript <span class="">с нуля до профессионала</span>
               </h1>
-              <p class="lead mb-4">
-                Интерактивный самоучитель с практическими заданиями, который
-                поможет вам стать разработчиком
+              <p class="lead mb-4 fs-5 animate__animated animate__fadeIn animate__delay-1s">
+                Интерактивный самоучитель с практическими заданиями, который поможет вам стать востребованным разработчиком
               </p>
-              <div class="d-grid gap-3 d-sm-flex">
-                <a href="/lessons" class="btn btn-light btn-lg px-4"
+              <div class="d-grid gap-3 d-sm-flex animate__animated animate__fadeIn animate__delay-2s">
+                <a href="/lessons" class="btn btn-primary btn-lg px-4 py-3 rounded-pill shadow"
                   >Начать обучение</a
                 >
-                <a href="#features" class="btn btn-outline-light btn-lg px-4"
+                <a href="#features" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill"
                   >Узнать больше</a
                 >
               </div>
             </div>
-            <div class="col-lg-6 d-none d-lg-block">
+            <div class="col-lg-6 d-none d-lg-block animate__animated animate__fadeIn">
               <img
                 src="../static/img/code.jpg"
                 alt="JavaScript код"
-                class="img-fluid rounded shadow"
+                class="img-fluid rounded-3 shadow-lg"
+                style="transform: perspective(1000px) rotateY(-15deg);"
               />
             </div>
           </div>
         </div>
+        <div class="custom-shape-divider-bottom-1716472603">
+          <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
+              <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
+              <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
+          </svg>
+      </div>
       </section>
 
       <!-- Основные преимущества -->
       <section id="features" class="py-5 bg-light">
-        <div class="container">
+        <div class="container py-5">
           <div class="text-center mb-5">
-            <h2 class="fw-bold">Почему выбирают наш самоучитель</h2>
+            <h2 class="fw-bold display-5">Почему выбирают наш самоучитель</h2>
             <p class="lead text-muted">6 причин начать обучение прямо сейчас</p>
+            <div class="mx-auto" style="height: 4px; width: 80px; background: linear-gradient(to right, #0d6efd, #6c757d);"></div>
           </div>
 
           <div class="row g-4">
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 border-0 shadow-sm">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body text-center p-4">
                   <div
                     class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
@@ -56,16 +64,14 @@
                   </div>
                   <h4 class="mb-3">Практика в браузере</h4>
                   <p class="text-muted">
-                    Встроенный редактор кода с мгновенным выполнением и
-                    проверкой заданий без необходимости установки дополнительных
-                    программ
+                    Встроенный редактор кода с мгновенным выполнением и проверкой заданий без необходимости установки дополнительных программ
                   </p>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 border-0 shadow-sm">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body text-center p-4">
                   <div
                     class="feature-icon bg-success bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
@@ -78,15 +84,14 @@
                   </div>
                   <h4 class="mb-3">Пошаговая система</h4>
                   <p class="text-muted">
-                    Продуманная программа обучения от основ до продвинутых
-                    концепций с постепенным увеличением сложности
+                    Продуманная программа обучения от основ до продвинутых концепций с постепенным увеличением сложности
                   </p>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 border-0 shadow-sm">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body text-center p-4">
                   <div
                     class="feature-icon bg-info bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
@@ -96,15 +101,14 @@
                   </div>
                   <h4 class="mb-3">Реальные проекты</h4>
                   <p class="text-muted">
-                    Создавайте настоящие приложения в процессе обучения и
-                    пополняйте свое портфолио
+                    Создавайте настоящие приложения в процессе обучения и пополняйте свое портфолио
                   </p>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 border-0 shadow-sm">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body text-center p-4">
                   <div
                     class="feature-icon bg-warning bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
@@ -114,15 +118,14 @@
                   </div>
                   <h4 class="mb-3">Сообщество</h4>
                   <p class="text-muted">
-                    Общайтесь с другими учениками, задавайте вопросы и получайте
-                    помощь от более опытных разработчиков
+                    Общайтесь с другими учениками, задавайте вопросы и получайте помощь от более опытных разработчиков
                   </p>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 border-0 shadow-sm">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body text-center p-4">
                   <div
                     class="feature-icon bg-danger bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
@@ -130,16 +133,16 @@
                   >
                     <i class="bi bi-graph-up" style="font-size: 1.5rem"></i>
                   </div>
-                  <h4 class="mb-3">Гарантия прогресса обучения</h4>
+                  <h4 class="mb-3">Гарантия прогресса</h4>
                   <p class="text-muted">
-                    Гаранируем повышение навыков написания кода на JavaScript
+                    Гаранируем повышение навыков написания кода на JavaScript при прохождении курса
                   </p>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 border-0 shadow-sm">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body text-center p-4">
                   <div
                     class="feature-icon bg-dark bg-gradient text-white rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
@@ -149,8 +152,7 @@
                   </div>
                   <h4 class="mb-3">Мобильное обучение</h4>
                   <p class="text-muted">
-                    Доступ к урокам с любого устройства - учитесь когда и где
-                    удобно
+                    Доступ к урокам с любого устройства - учитесь когда и где удобно
                   </p>
                 </div>
               </div>
@@ -160,34 +162,35 @@
       </section>
 
       <!-- Упрощенная программа обучения -->
-      <section class="py-5">
-        <div class="container">
+      <section class="py-5 bg-white">
+        <div class="container py-5">
           <div class="text-center mb-5">
-            <h2 class="fw-bold">Программа обучения</h2>
+            <h2 class="fw-bold display-5">Программа обучения</h2>
             <p class="lead text-muted">
               Пошаговый путь от основ до реальных проектов
             </p>
+            <div class="mx-auto" style="height: 4px; width: 80px; background: linear-gradient(to right, #0d6efd, #6c757d);"></div>
           </div>
           <div class="row g-4">
-            <div class="row ">
+            <div class="row">
               {%for less in lesson%}
-              <div class="col-lg-4">
-                <div class="card border-0 shadow-lg lesson-card">
-                  <div class="card-header bg-gradient-primary  py-3">
+              <div class="col-lg-4 bg-p mb-4">
+                <div class="card border-0 shadow-lg lesson-card hover-effect">
+                  <div class="card-header bg-primary py-3">
                     <div class="d-flex justify-content-between align-items-center">
-                      <h4 class="mb-0">{{less.title}}</h4>
+                      <h4 class="mb-0 text-white">{{less.title}}</h4>
                       <span class="badge bg-light text-primary">Урок {{loop.index}}</span>
                     </div>
                   </div>
                   <div class="card-body">
-                    <div class="learning-objectives   rounded mb-4 text-truncate" style="max-height: 200px;">
+                    <div class="learning-objectives rounded mb-4 text-truncate" style="max-height: 200px;">
                       {{less.description}}
                     </div>
                   </div>        
                   <div class="card-footer bg-transparent border-0 py-3">
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
-                        <a href="/lesson/{{less.id}}" class="btn btn-primary me-2">
+                        <a href="/lesson/{{less.id}}" class="btn btn-primary me-2 rounded-pill">
                           <i class="bi bi-play-circle me-1"></i> Перейти
                         </a>
                       </div>
@@ -199,7 +202,7 @@
             </div>
           </div>
           <div class="text-center mt-5">
-            <a href="/lessons" class="btn btn-primary btn-lg"
+            <a href="/lessons" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow"
               >Посмотреть все уроки</a
             >
           </div>
@@ -208,80 +211,102 @@
 
       <!-- Отзывы -->
       <section class="py-5 bg-light">
-        <div class="container">
+        <div class="container py-5">
           <div class="text-center mb-5">
-            <h2 class="fw-bold">Отзывы наших студентов</h2>
+            <h2 class="fw-bold display-5">Отзывы наших студентов</h2>
             <p class="lead text-muted">
               Что говорят те, кто уже прошел обучение
             </p>
+            <div class="mx-auto" style="height: 4px; width: 80px; background: linear-gradient(to right, #0d6efd, #6c757d);"></div>
           </div>
 
           <div class="row g-4">
             <div class="col-md-4">
-              <div class="card h-100">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body p-4">
-                  <div class="d-flex mb-3">
+                  <div class="d-flex mb-3 align-items-center">
                     <img
                       src="../static/img/1.jpg"
-                      class="rounded-circle me-3"
+                      class="rounded-circle me-3 shadow-sm"
                       alt="Аватар"
-                      width="100%"
+                      width="60"
+                      height="60"
                     />
+                    <div>
+                      <h5 class="mb-1">Алексей Петров</h5>
+                      <small class="text-muted">Frontend разработчик</small>
+                    </div>
                   </div>
-                  <div>
-                    <h5 class="mb-1">Алексей Петров</h5>
-                </div>
                   <p class="card-text">
-                    "Отличный курс для начинающих! Все объясняется понятным
-                    языком, много практики. После завершения смог устроиться на
-                    первую работу фронтенд-разработчиком."
+                    "Отличный курс для начинающих! Все объясняется понятным языком, много практики. После завершения смог устроиться на первую работу фронтенд-разработчиком."
                   </p>
+                  <div class="text-warning">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="col-md-4">
-              <div class="card h-100">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body p-4">
-                  <div class="d-flex mb-3">
+                  <div class="d-flex mb-3 align-items-center">
                     <img
                       src="../static/img/3.jpg"
-                      class="rounded-circle me-3"
+                      class="rounded-circle me-3 shadow-sm"
                       alt="Аватар"
-                      width="100%"
+                      width="60"
+                      height="60"
                     />
+                    <div>
+                      <h5 class="mb-1">Елена Смирнова</h5>
+                      <small class="text-muted">Fullstack разработчик</small>
+                    </div>
                   </div>
-                  <div>
-                    <h5 class="mb-1">Елена Смирнова</h5>
-                </div>
                   <p class="card-text">
-                    "Очень понравилась система обучения - можно сразу применять
-                    знания на практике. Интересные задания, которые
-                    действительно помогают разобраться в теме."
+                    "Очень понравилась система обучения - можно сразу применять знания на практике. Интересные задания, которые действительно помогают разобраться в теме."
                   </p>
+                  <div class="text-warning">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="col-md-4">
-              <div class="card h-100">
+              <div class="card h-100 border-0 shadow-sm hover-effect">
                 <div class="card-body p-4">
-                  <div class="d-flex mb-3">
+                  <div class="d-flex mb-3 align-items-center">
                     <img
                       src="../static/img/2.jpg"
-                      class="rounded-circle me-3"
+                      class="rounded-circle me-3 shadow-sm"
                       alt="Аватар"
-                      width="100%"
+                      width="60"
+                      height="60"
                     />
+                    <div>
+                      <h5 class="mb-1">Дмитрий Иванов</h5>
+                      <small class="text-muted">JavaScript разработчик</small>
+                    </div>
                   </div>
-                  <div>
-                    <h5 class="mb-1">Дмитрий Иванов</h5>
-                </div>
                   <p class="card-text">
-                    "Хорошая структура курса. Особенно полезны реальные проекты
-                    в конце - они помогают понять, как все работает вместе.
-                    Рекомендую всем, кто хочет изучить JavaScript."
+                    "Хорошая структура курса. Особенно полезны реальные проекты в конце - они помогают понять, как все работает вместе. Рекомендую всем, кто хочет изучить JavaScript."
                   </p>
+                  <div class="text-warning">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-half"></i>
+                  </div>
                 </div>
               </div>
             </div>
@@ -290,39 +315,66 @@
       </section>
 
       <!-- Статистика -->
-      <section class="py-5 bg-primary text-white">
-        <div class="container">
-          <div class="row text-center">
+      <section class="py-5 bg-primary text-white position-relative overflow-hidden">
+        <div class="container py-5">
+          <div class="row text-center position-relative z-index-1">
             <div class="col">
-              <div class="display-5 fw-bold">
-                Более 1000 довольных студентов
+              <div class="display-4 fw-bold mb-4">
+                Более <span class="counter" data-target="1000">0</span> довольных студентов
               </div>
-              <p class="mb-0">
-                Присоединяйтесь к их числу и становитесь JavaScript
-                разработчиками!
+              <p class="mb-0 fs-5">
+                Присоединяйтесь к их числу и становитесь профессиональными JavaScript разработчиками!
               </p>
             </div>
           </div>
+        </div>
+        <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
+          <div class="background-pattern"></div>
         </div>
       </section>
 
       <!-- Призыв к действию -->
-      <section class="py-5">
-        <div class="container">
+      <section class="py-5 bg-white">
+        <div class="container py-5">
           <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
-              <h2 class="fw-bold mb-4">Готовы начать обучение?</h2>
-              <p class="lead mb-4">
-                Присоединяйтесь к тысячам студентов, которые уже освоили
-                JavaScript с нашим самоучителем
+              <h2 class="fw-bold mb-4 display-5">Готовы начать обучение?</h2>
+              <p class="lead mb-4 fs-4">
+                Присоединяйтесь к тысячам студентов, которые уже освоили JavaScript с нашим самоучителем
               </p>
+              {%if 'name' not in session and not active_user %}
               <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                <a href="/auth" class="btn btn-primary btn-lg px-4"
+                <a href="/auth" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow"
                   >Зарегистрироваться</a
                 >
               </div>
+              {%endif%}
             </div>
           </div>
         </div>
       </section>
-      {% endblock %}
+      
+      <script>
+        // Анимация счетчика
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+        
+        counters.forEach(counter => {
+          const updateCount = () => {
+            const target = +counter.getAttribute('data-target');
+            const count = +counter.innerText;
+            
+            const inc = target / speed;
+            
+            if(count < target) {
+              counter.innerText = Math.ceil(count + inc);
+              setTimeout(updateCount, 1);
+            } else {
+              counter.innerText = target;
+            }
+          }
+          
+          updateCount();
+        });
+      </script>
+{% endblock %}

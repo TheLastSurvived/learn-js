@@ -1,220 +1,311 @@
 {% extends 'base.html' %}
 {% block title %}
-{{less.title}}
+{{ less.title }} 
 {% endblock %}
 
 {% block main %}
 {{ ckeditor.load() }}
-        <div class="row">
-            <div class="col-lg-10 mx-auto">
-              {%if existing_solution.is_correct%}
-                <div class="container">
-                  <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                      Этот урок был пройден!
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-              </div>
-          
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <!-- Уведомление о пройденном уроке -->
+      {% if existing_solution and existing_solution.is_correct %}
+      <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+          <div>
+            <h5 class="alert-heading mb-1">Урок пройден!</h5>
+            <p class="mb-0">Вы успешно выполнили это задание.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endif %}
 
-                {%endif%}
+      <!-- Хлебные крошки -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-light p-3 rounded-3 shadow-sm">
+          <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door me-1"></i> Главная</a></li>
+          <li class="breadcrumb-item"><a href="/lessons"><i class="bi bi-journal-bookmark me-1"></i> Уроки</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ less.title }}</li>
+        </ol>
+      </nav>
 
+      <!-- Кнопки управления для админа -->
+      {% if 'name' in session and active_user.root == 1 %}
+      <div class="d-flex gap-2 mb-4">
+        <button type="button" class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#editLessonModal">
+          <i class="bi bi-pencil-square me-1"></i> Редактировать
+        </button>
+        <a href="/delete-lesson/{{ less.id }}" class="btn btn-danger rounded-pill shadow-sm" onclick="return confirm('Вы уверены, что хотите удалить этот урок?')">
+          <i class="bi bi-trash me-1"></i> Удалить
+        </a>
+      </div>
 
-                <nav aria-label="breadcrumb" class="mb-4">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/lessons">Все уроки</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">{{less.title}}</li>
-                    </ol>
-                </nav>
-                {%if 'name' in session and active_user.root==1%}
-                <button
-                type="button"
-                class="btn btn-primary mb-3"
-                data-bs-toggle="modal"
-                data-bs-target="#exampleModal"
-              >
-                Изменить
-              </button>
-              <a href="/delete-lesson/{{less.id}}" class="btn btn-danger mb-3">Удалить</a>
-          
-              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="exampleModalLabel">Изменить урок</h1>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <form method="post" enctype="multipart/form-data">
-                        <div class="mb-3">
-                          <label for="disabledTextInput" class="form-label">Название</label>
-                          <input type="text" id="disabledTextInput" class="form-control" name="title" value="{{less.title}}" placeholder="Название"
-                            required>
-                        </div>
-                        <div class="mb-3">
-                          <label for="disabledTextInput" class="form-label">Описание</label>
-                          <input type="text" id="disabledTextInput" class="form-control" value="{{less.description}}" name="description" placeholder="Описание"
-                            required>
-                        </div>
-                       
-                        <div class="mb-3">
-                          <h3>Текст урока</h3>
-                          {{ ckeditor.create(value=less.content) }}
-                        </div>
-                        <div class="mb-3">
-                          <label for="exampleFormControlTextarea1" class="form-label">Задание</label>
-                          <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" value="" name="task" placeholder="Задание">{{less.task}}</textarea>
-                        </div>
-                        <div class="mb-3">
-                          <label for="exampleFormControlTextarea1" class="form-label">Решение</label>
-                          <textarea class="form-control" id="exampleFormControlTextarea1" name="solution" value="" rows="3" placeholder="Решение">{{less.solution}}</textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Закрыть</button>
-                      <button type="submit" class="btn btn-primary">Изменить урок</button>
-                    </div>
-                    </form>
+      <!-- Модальное окно редактирования -->
+      <div class="modal fade" id="editLessonModal" tabindex="-1" aria-labelledby="editLessonModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <h2 class="modal-title fs-5" id="editLessonModalLabel"><i class="bi bi-journal-plus me-2"></i>Редактировать урок</h2>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="lessonTitle" class="form-label">Название урока</label>
+                    <input type="text" class="form-control rounded-pill" id="lessonTitle" name="title" value="{{ less.title }}" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lessonDescription" class="form-label">Описание</label>
+                    <input type="text" class="form-control rounded-pill" id="lessonDescription" name="description" value="{{ less.description }}" required>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Содержание урока</label>
+                    {{ ckeditor.create(value=less.content) }}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lessonTask" class="form-label">Задание</label>
+                    <textarea class="form-control" id="lessonTask" rows="4" name="task" style="border-radius: 15px;">{{ less.task }}</textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lessonSolution" class="form-label">Решение</label>
+                    <textarea class="form-control" id="lessonSolution" name="solution" rows="4" style="border-radius: 15px;">{{ less.solution }}</textarea>
                   </div>
                 </div>
-              </div>
-              {%endif%}
-                <h1 class="mb-4">{{less.title}}</h1>
-                <p>{{less.description}}</p>
-                
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Теория</h5>
-                    </div>
-                    <div class="card-body">
-                        {% autoescape false %} {{less.content}} {% endautoescape %}
-                    </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
+                  <button type="submit" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-save me-1"></i> Сохранить изменения
+                  </button>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Задание</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="bg-success text-white p-3 rounded my-3 text-center">
-                            {% autoescape false %} {{less.task}} {% endautoescape %}
-
-                        </div>
-                        <input type="text" class="d-none" value="{{less.id}}" id="idLesson">
-                        <input type="text" class="d-none" value="{{active_user.id}}" id="idUser">
-                        <div class="mb-3">
-                            <label for="codeEditor" class="form-label">Редактор кода:</label>
-                            <textarea class="form-control font-monospace" id="codeEditor" rows="10" style="font-family: monospace;"></textarea>
-                        </div>
-                        
-                        <div>
-                          
-                          <p> <span class="text-danger font-weight-bold">Внимание!</span> Ваш код должен возвращать результат в переменной <code>result</code>.</p>
-                          <p> <b>Пример</b> </p>
-<pre>
-  <code>
-    const a = 5;
-    const b = 10;
-    const result = a + b; // Возвращает 15
-  </code>
-</pre>
-                          
-                        </div>
-                      
-                        <button class="btn btn-success" id="checkCode">
-                            <i class="bi bi-check-circle-fill"></i> Проверить
-                        </button>
-                        
-                        <div class="mt-3">
-                            <h5>Результат:</h5>
-                            <div class="border p-3 bg-light" id="output">
-                                <!-- Здесь будет вывод кода -->
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-success mt-3 d-none" id="successAlert">
-                            <i class="bi bi-check-circle-fill"></i> Поздравляем! Вы успешно выполнили задание.
-                        </div>
-
-                        <div class="alert alert-danger mt-3 d-none" id="dangerAlert">
-                            <i class="bi bi-check-circle-fill"></i> Вы не правильно выполнили задание!
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-between mt-4">
-                    {% if prev_lesson %}
-                    <a href="/lesson/{{ prev_lesson.id }}" class="btn btn-outline-primary">
-                        <i class="bi bi-chevron-left"></i> Предыдущий урок
-                    </a>
-                    {% else %}
-                    <button class="btn btn-outline-primary disabled">
-                        <i class="bi bi-chevron-left"></i> Предыдущий урок
-                    </button>
-                    {% endif %}
-                    
-                    {% if next_lesson %}
-                    <a href="/lesson/{{ next_lesson.id }}" class="btn btn-primary">
-                        Следующий урок <i class="bi bi-chevron-right"></i>
-                    </a>
-                    {% else %}
-                    <button class="btn btn-primary disabled">
-                        Следующий урок <i class="bi bi-chevron-right"></i>
-                    </button>
-                    {% endif %}
-                </div>
+              </form>
             </div>
+          </div>
         </div>
+      </div>
+      {% endif %}
 
-                        <!-- Comments Section -->
-                        <div class="card my-4">
-                          <div class="card-header bg-info text-white">
-                              <h5 class="mb-0">Комментарии</h5>
-                          </div>
-                          <div class="card-body">
-                              <!-- Comment Form -->
-                              {% if 'name' in session %}
-                              <form action="/add-comment/{{less.id}}" method="post" class="mb-4">
-                                  <div class="mb-3">
-                                      <label for="commentContent" class="form-label">Оставить комментарий</label>
-                                      <textarea class="form-control" id="commentContent" name="comment_content" rows="3" required></textarea>
-                                  </div>
-                                  <button type="submit" class="btn btn-primary">Отправить</button>
-                              </form>
-                              {% else %}
-                              <div class="alert alert-info">
-                                  Чтобы оставить комментарий, <a href="/auth">войдите</a> в систему.
-                              </div>
-                              {% endif %}
-                              
-                              <!-- Comments List -->
-                              <div class="comments-list">
-                                  {% for comment in comments %}
-                                  <div class="comment mb-3 border-bottom pb-3">
-                                      <div class="d-flex align-items-center mb-2">
-                                          <img src="../static/img/upload/{{comment.user.avatar}}" 
-                                               class="rounded-circle me-2" 
-                                               width="40" height="40" 
-                                               alt="{{comment.user.name}}">
-                                          <div>
-                                              <strong>{{comment.user.name}} {{comment.user.surname}}</strong>
-                                              <small class="text-muted ms-2">{{comment.created_at.strftime('%d.%m.%Y %H:%M')}}</small>
-                                          </div>
-                                      </div>
-                                      <div class="comment-content">
-                                          {{comment.content}}
-                                      </div>
-                                  </div>
-                                  {% else %}
-                                  <div class="text-muted">Пока нет комментариев. Будьте первым!</div>
-                                  {% endfor %}
-                              </div>
-                          </div>
-                      </div>
+      <!-- Заголовок урока -->
+      <div class="d-flex align-items-center mb-4">
+        <div class="badge bg-primary rounded-pill px-3 py-2 me-3">Урок</div>
+        <h1 class="mb-0">{{ less.title }}</h1>
+      </div>
+      
+      <p class="lead text-muted mb-4">{{ less.description }}</p>
+
+      <!-- Карточка с теорией -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-gradient-primary text-white rounded-top">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-journal-text me-2 fs-4"></i>
+            <h5 class="mb-0">Теория</h5>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="lesson-content p-3 rounded-3 bg-light">
+            {% autoescape false %} {{ less.content }} {% endautoescape %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточка с заданием -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-gradient-success text-white rounded-top">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-code-square me-2 fs-4"></i>
+            <h5 class="mb-0">Практическое задание</h5>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Задание -->
+          <div class="task-card bg-success bg-opacity-10 p-4 rounded-3 border border-success border-opacity-25 mb-4">
+            <div class="d-flex align-items-center mb-3">
+              <i class="bi bi-lightbulb text-success me-2 fs-4"></i>
+              <h5 class="mb-0 text-success">Ваша задача</h5>
+            </div>
+            {% autoescape false %} {{ less.task }} {% endautoescape %}
+          </div>
+
+          <!-- Редактор кода -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label for="codeEditor" class="form-label fw-bold">
+                <i class="bi bi-terminal me-1"></i> Редактор кода
+              </label>
+              <button class="btn btn-sm btn-outline-secondary rounded-pill" id="resetCode">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Сбросить
+              </button>
+            </div>
+            <textarea class="form-control font-monospace" id="codeEditor" rows="10" style="border-radius: 15px; font-family: 'Fira Code', monospace;"></textarea>
+            <input type="hidden" value="{{ less.id }}" id="idLesson">
+            <input type="hidden" value="{{ active_user.id if active_user else '' }}" id="idUser">
+          </div>
+
+          <!-- Пример решения -->
+          <div class="alert alert-info mb-4">
+            <div class="d-flex align-items-center mb-2">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <h5 class="mb-0">Важно!</h5>
+            </div>
+            <p>Ваш код должен возвращать результат в переменной <code>result</code>.</p>
+            <div class="bg-dark text-light p-3 rounded-3 mt-2">
+              <pre class="mb-0"><code class="language-javascript">
+// Пример решения
+const a = 5;
+const b = 10;
+const result = a + b; // Возвращает 15
+              </code></pre>
+            </div>
+          </div>
+
+          <!-- Кнопка проверки и результаты -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-success rounded-pill px-4 shadow-sm" id="checkCode">
+              <i class="bi bi-play-fill me-1"></i> Проверить решение
+            </button>
+            
+            <div class="d-flex align-items-center">
+              <div class="spinner-border text-primary d-none" id="loadingSpinner" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="output-container mb-4 d-none" id="outputContainer">
+            <h5 class="d-flex align-items-center mb-3">
+              <i class="bi bi-terminal me-2"></i> Результат выполнения:
+            </h5>
+            <div class="bg-dark text-light p-3 rounded-3" id="output">
+              <!-- Здесь будет вывод кода -->
+            </div>
+          </div>
+
+          <div class="alert alert-success d-none align-items-center" id="successAlert" role="alert">
+            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+            <div>
+              <h5 class="alert-heading mb-1">Поздравляем!</h5>
+              <p class="mb-0">Вы успешно выполнили задание.</p>
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none align-items-center" id="dangerAlert" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+              <h5 class="alert-heading mb-1">Ошибка!</h5>
+              <p class="mb-0" id="errorMessage">Решение неверное. Попробуйте еще раз.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Навигация между уроками -->
+      <div class="d-flex justify-content-between mt-5">
+        {% if prev_lesson %}
+        <a href="/lesson/{{ prev_lesson.id }}" class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm">
+          <i class="bi bi-chevron-left me-1"></i> Предыдущий урок
+        </a>
+        {% else %}
+        <button class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm disabled">
+          <i class="bi bi-chevron-left me-1"></i> Предыдущий урок
+        </button>
+        {% endif %}
         
-        <!-- Подключаем библиотеку для подсветки синтаксиса -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script>
+        {% if next_lesson %}
+        <a href="/lesson/{{ next_lesson.id }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+          Следующий урок <i class="bi bi-chevron-right ms-1"></i>
+        </a>
+        {% else %}
+        <button class="btn btn-primary rounded-pill px-4 py-2 shadow-sm disabled">
+          Следующий урок <i class="bi bi-chevron-right ms-1"></i>
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Секция комментариев -->
+      <div class="card border-0 shadow-sm mt-5">
+        <div class="card-header bg-gradient-info text-white rounded-top">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-chat-square-text me-2 fs-4"></i>
+            <h5 class="mb-0">Обсуждение урока</h5>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Форма комментария -->
+          {% if 'name' in session %}
+          <form action="/add-comment/{{ less.id }}" method="post" class="mb-4">
+            <div class="mb-3">
+              <label for="commentContent" class="form-label fw-bold">
+                <i class="bi bi-pencil me-1"></i> Оставить комментарий
+              </label>
+              <textarea class="form-control" id="commentContent" name="comment_content" rows="3" style="border-radius: 15px;" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-info text-white rounded-pill px-4 shadow-sm">
+              <i class="bi bi-send me-1"></i> Отправить
+            </button>
+          </form>
+          {% else %}
+          <div class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+            <div>
+              Чтобы оставить комментарий, пожалуйста <a href="/auth" class="alert-link">войдите</a> в систему.
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Список комментариев -->
+          <div class="comments-list">
+            {% if comments %}
+              {% for comment in comments %}
+              <div class="comment mb-4 pb-3 border-bottom">
+                <div class="d-flex align-items-center mb-3">
+                  <img src="../static/img/upload/{{ comment.user.avatar }}" 
+                       class="rounded-circle me-3 shadow-sm" 
+                       width="48" 
+                       height="48" 
+                       alt="{{ comment.user.name }}"
+                       onerror="this.src='../static/img/user-default.png'">
+                  <div>
+                    <h6 class="mb-0 fw-bold">{{ comment.user.name }} {{ comment.user.surname }}</h6>
+                    <small class="text-muted">
+                      <i class="bi bi-clock me-1"></i> {{ comment.created_at.strftime('%d.%m.%Y в %H:%M') }}
+                    </small>
+                  </div>
+                </div>
+                <div class="comment-content ps-2">
+                  {{ comment.content }}
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-center py-4">
+                <i class="bi bi-chat-square-text fs-1 text-muted mb-3"></i>
+                <p class="text-muted">Пока нет комментариев. Будьте первым!</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Подключение библиотек для подсветки синтаксиса -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<script>
+  // Инициализация редактора кода
+  document.addEventListener('DOMContentLoaded', function() {
+    // Сброс кода
+    document.getElementById('resetCode').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('codeEditor').value = '';
+    });
     
-    {% endblock %}
- 
+   
+  });
+</script>
+{% endblock %}

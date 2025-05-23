@@ -172,8 +172,12 @@ def regestration():
 
 @app.route('/lessons', methods=['GET', 'POST'])
 def lessons():
-    lesson = Lesson.query.all()
-
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Количество уроков на странице
+    
+    # Получаем уроки с пагинацией
+    pagination = Lesson.query.order_by(Lesson.id).paginate(page=page, per_page=per_page, error_out=False)
+    
     top_users = db.session.query(
         Users,
         db.func.count(UserSolution.lesson_id.distinct()).label('completed_count')
@@ -187,7 +191,6 @@ def lessons():
         db.desc('completed_count')
     ).limit(5).all()
 
-
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
@@ -199,7 +202,8 @@ def lessons():
         db.session.commit()
         flash("Урок добавлен!", category="success")
         return redirect(url_for("lessons"))
-    return render_template("lessons.html",lesson=lesson,top_users=top_users)
+    
+    return render_template("lessons.html", pagination=pagination, top_users=top_users)
 
 
 @app.route('/lesson/<int:id>', methods=['GET', 'POST'])
@@ -208,7 +212,11 @@ def lesson(id):
         flash("Для продолжения  необходимо войти!", category="success")
         return redirect('/auth')
 
+
+
     less = Lesson.query.get(id)
+    if not less:
+        abort(404)
     count = Lesson.query.count()
     comments = Comment.query.filter_by(lesson_id=id).order_by(Comment.created_at.desc()).all()
     prev_lesson = Lesson.query.filter(Lesson.id < id)\
@@ -246,7 +254,7 @@ def delete_article(id):
     obj = Lesson.query.filter_by(id=id).first()
     db.session.delete(obj)
     db.session.commit()
-    flash("Урок удалена!", category="warning")
+    flash("Урок удалён!", category="warning")
     return redirect('/lessons')
 
 

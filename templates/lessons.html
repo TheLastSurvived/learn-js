@@ -1,127 +1,215 @@
 {% extends 'base.html' %}
 {% block title %}
-Уроки
+Уроки JavaScript
 {% endblock %}
 
 {% block main %}
 {{ ckeditor.load() }}
-      <div class="row">
-        <div class="col-lg-12 mx-auto">
-          <h1 class="mb-4">Уроки JavaScript</h1>
-          {%if 'name' in session and active_user.root==1%}
-          <button
-    type="button"
-    class="btn btn-dark mb-3"
-    data-bs-toggle="modal"
-    data-bs-target="#exampleModal"
-  >
-    Добавить урок
-  </button>
+<div class="container my-3">
+  <div class="row">
+    <div class="col-lg-12 mx-auto">
+      <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="display-5 fw-bold text-gradient-primary">Уроки JavaScript</h1>
+        {% if 'name' in session and active_user.root == 1 %}
+        <button type="button" class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addLessonModal">
+          <i class="bi bi-plus-circle me-2"></i>Добавить урок
+        </button>
+        {% endif %}
+      </div>
 
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Добавить запись</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <!-- Модальное окно добавления урока -->
+      {% if 'name' in session and active_user.root == 1 %}
+      <div class="modal fade" id="addLessonModal" tabindex="-1" aria-labelledby="addLessonModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <h2 class="modal-title fs-5" id="addLessonModalLabel"><i class="bi bi-journal-plus me-2"></i>Добавить новый урок</h2>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="lessonTitle" class="form-label">Название урока</label>
+                    <input type="text" class="form-control rounded-pill" id="lessonTitle" name="title" placeholder="Введите название" required>
+                    <div class="invalid-feedback">Пожалуйста, введите название урока</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lessonDescription" class="form-label">Краткое описание</label>
+                    <input type="text" class="form-control rounded-pill" id="lessonDescription" name="description" placeholder="Краткое описание" required>
+                    <div class="invalid-feedback">Пожалуйста, добавьте описание</div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Содержание урока</label>
+                    {{ ckeditor.create() }}
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lessonTask" class="form-label">Задание</label>
+                    <textarea class="form-control" id="lessonTask" rows="4" name="task" placeholder="Опишите задание для урока" style="border-radius: 15px;"></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="lessonSolution" class="form-label">Решение</label>
+                    <textarea class="form-control" id="lessonSolution" name="solution" rows="4" placeholder="Решение задания" style="border-radius: 15px;"></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
+                  <button type="submit" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-save me-1"></i> Сохранить урок
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-        <div class="modal-body">
-          <form method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-              <label for="disabledTextInput" class="form-label">Название</label>
-              <input type="text" id="disabledTextInput" class="form-control" name="title" placeholder="Название"
-                required>
+      </div>
+      {% endif %}
+
+      <div class="row g-4">
+
+         <!-- Список уроков -->
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-journal-bookmark me-2"></i>Все уроки</h5>
+                
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="disabledTextInput" class="form-label">Описание</label>
-              <input type="text" id="disabledTextInput" class="form-control" name="description" placeholder="Описание"
-                required>
+            <div class="card-body p-0">
+              <div class="list-group list-group-flush">
+                {% for less in pagination.items %}
+                <div class="list-group-item border-0 py-3 hover-effect">
+                  <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div class="me-3">
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-primary rounded-pill me-2 px-3 py-2">{{ (pagination.page - 1) * pagination.per_page + loop.index }}</span>
+                        <h5 class="mb-0">{{ less.title }}</h5>
+                      </div>
+                      <p class="text-muted mb-2">{{ less.description }}</p>
+                   
+                    </div>
+                    <a href="/lesson/{{ less.id }}" class="btn btn-outline-primary rounded-pill px-4">
+                      Изучить <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                  </div>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                  <i class="bi bi-journal-x fs-1 text-muted mb-3"></i>
+                  <h5 class="text-muted">Уроки не найдены</h5>
+                  <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                </div>
+                {% endfor %}
+              </div>
             </div>
-           
-            <div class="mb-3">
-              <h3>Текст урока</h3>
-              {{ ckeditor.create() }}
+            <div class="card-footer bg-white border-0 py-3">
+              <nav aria-label="Навигация по урокам">
+                <ul class="pagination justify-content-center mb-0">
+                  {% if pagination.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('lessons', page=pagination.prev_num) }}" tabindex="-1">Назад</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Назад</a>
+                    </li>
+                  {% endif %}
+
+                  {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                      {% if page_num == pagination.page %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ page_num }}</a></li>
+                      {% else %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('lessons', page=page_num) }}">{{ page_num }}</a></li>
+                      {% endif %}
+                    {% else %}
+                      <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if pagination.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('lessons', page=pagination.next_num) }}">Вперед</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <a class="page-link" href="#">Вперед</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
             </div>
-            <div class="mb-3">
-              <label for="exampleFormControlTextarea1" class="form-label">Задание</label>
-              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="task" placeholder="Задание"></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="exampleFormControlTextarea1" class="form-label">Решение</label>
-              <textarea class="form-control" id="exampleFormControlTextarea1" name="solution" rows="3" placeholder="Решение"></textarea>
-            </div>
+          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-          <button type="submit" class="btn btn-dark">Добавить урок</button>
+        <!-- Боковая панель с топом пользователей -->
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-gradient-primary text-white rounded-top">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-trophy-fill me-2 fs-4"></i>
+                <h5 class="mb-0">Топ 5 пользователей</h5>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              {% if top_users %}
+              <div class="list-group list-group-flush">
+                {% for user, count in top_users %}
+                <div class="list-group-item border-0 py-3 hover-effect">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      <img src="../static/img/upload/{{ user.avatar }}" 
+                           class="rounded-circle me-3 shadow-sm" 
+                           width="48" 
+                           height="48" 
+                           alt="{{ user.name }}"
+                           onerror="this.src='../static/img/user-default.png'">
+                      <div>
+                        <h6 class="mb-0">{{ user.name }} {{ user.surname }}</h6>
+                        <small class="text-muted">{{ user.email|truncate(20) }}</small>
+                      </div>
+                    </div>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">{{ count }}</span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="text-center py-4">
+                <i class="bi bi-people fs-1 text-muted mb-3"></i>
+                <p class="text-muted">Пока нет данных о выполненных уроках</p>
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
         </div>
-        </form>
+
+       
       </div>
     </div>
   </div>
-  {%endif%}
-            
-            
-          <div class="row">
-            <div class="col-lg-4">
-              <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-trophy-fill me-2"></i>Топ 5 пользователей
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        {% for user, count in top_users %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                <img src="../static/img/upload/{{ user.avatar }}" 
-                                     class="rounded-circle me-3" 
-                                     width="40" 
-                                     height="40" 
-                                     alt="{{ user.name }}">
-                                <div>
-                                    <h6 class="mb-0">{{ user.name }} {{ user.surname }}</h6>
-                                    <small class="text-muted">{{ user.email }}</small>
-                                </div>
-                            </div>
-                            <span class="badge bg-primary rounded-pill">{{ count }} выполненных уроков</span>
-                        </div>
-                        {% else %}
-                        <div class="text-center text-muted py-3">
-                            Пока нет данных о выполненных уроках
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            </div>
-            <div class="col-lg-8">
-              <div class="list-group mb-5">
-                {%for less in lesson%}
-                <div class="list-group-item list-group-item-action">
-                  
-                  <div
-                    class="d-flex w-100 justify-content-between align-items-center"
-                  >
-                    <div>
-                      <h5 class="mb-1">{{loop.index}}. {{less.title}}</h5>
-                      <p class="mb-1">{{less.description}}</p>
-                    </div>
+</div>
+
+
+
+<script>
+  // Валидация формы
+  (function() {
+    'use strict'
     
-                    <small
-                      ><a href="/lesson/{{less.id}}" class="text-decoration-none"
-                        >Перейти к уроку →</a
-                      ></small
-                    >
-                  </div>
-                </div>
-                {%endfor%}
-              
-              </div>
-            </div>
-          </div>
-       
-        </div>
-      </div>
-      {% endblock %}
+    const forms = document.querySelectorAll('.needs-validation')
+    
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>
+{% endblock %}
