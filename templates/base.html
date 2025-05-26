@@ -52,6 +52,13 @@
                   <i class="bi bi-card-checklist me-1"></i> Тесты
               </a>
           </li>
+          {% if active_user.root == 1 %}
+          <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('admin_tests') }}">
+                  <i class="bi bi-card-checklist me-1"></i> Управление тестами
+              </a>
+          </li>
+          {% endif %}
             <li class="nav-item">
               <a class="nav-link" href="/about">
                 <i class="bi bi-info-circle me-1"></i> О нас

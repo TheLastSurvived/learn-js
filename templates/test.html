@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}{{ test.title }}{% endblock %}
+
+{% block main %}
+<div class="container my-3">
+    
+    <h1 class="display-5 fw-bold text-gradient-primary">{{ test.title }}</h1>
+    <form id="testForm">
+        <input type="hidden" name="test_id" value="{{ test.id }}">
+        
+        {% for question in questions %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Вопрос {{ loop.index }}</h5>
+                <p class="card-text">{{ question.question }}</p>
+                
+                {% if question.code_snippet %}
+                <pre class="bg-light p-3 rounded"><code>{{ question.code_snippet }}</code></pre>
+                {% endif %}
+                
+                <div class="options">
+                    {% for key, value in question.options.items() %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" 
+                               name="q{{ question.id }}" 
+                               id="q{{ question.id }}_{{ key }}" 
+                               value="{{ key }}">
+                        <label class="form-check-label" for="q{{ question.id }}_{{ key }}">
+                            {{ value }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary btn-lg">Завершить тест</button>
+    </form>
+    
+    <div id="resultContainer" class="mt-4 d-none">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h4 class="card-title">Результат теста</h4>
+                <div class="display-4" id="scoreDisplay"></div>
+                <div class="progress mt-3 mb-3" style="height: 20px;">
+                    <div class="progress-bar" id="progressBar" role="progressbar"></div>
+                </div>
+                <p id="resultText"></p>
+                <a href="{{ url_for('tests_list') }}" class="btn btn-outline-primary">
+                    Вернуться к списку тестов
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('testForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const answers = {};
+    
+    // Собираем ответы
+    for (const [name, value] of formData.entries()) {
+        if (name.startsWith('q')) {
+            const qId = name.substring(1);
+            answers[qId] = value;
+        }
+    }
+    
+    const payload = {
+        test_id: formData.get('test_id'),
+        answers: answers
+    };
+    
+    try {
+        const response = await fetch('/api/submit-test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Показываем результаты
+            document.getElementById('scoreDisplay').textContent = 
+                `${result.score}/${result.total}`;
+            document.getElementById('progressBar').style.width = 
+                `${result.percent}%`;
+            document.getElementById('progressBar').textContent = 
+                `${result.percent}%`;
+            document.getElementById('resultText').textContent = 
+                getResultText(result.percent);
+            
+            document.getElementById('resultContainer').classList.remove('d-none');
+            form.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert('Ошибка: ' + result.error);
+        }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error.message);
+    }
+});
+
+function getResultText(percent) {
+    if (percent >= 90) return 'Отличный результат! Вы отлично знаете JavaScript!';
+    if (percent >= 70) return 'Хороший результат! Есть что улучшить.';
+    if (percent >= 50) return 'Средний результат. Продолжайте учиться!';
+    return 'Плохой результат. Рекомендуем повторить материал.';
+}
+</script>
+{% endblock %}

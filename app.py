@@ -109,7 +109,12 @@ class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    questions = db.relationship('TestQuestion', backref='test', lazy=True)
+
+    questions = db.relationship('TestQuestion', backref='test_relation', lazy=True, cascade='all,delete')
+    test_results = db.relationship('TestResult', backref='test_relation', lazy=True)
+
+    def __repr__(self):
+        return 'Test %r' % self.id
 
 class TestQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,6 +124,9 @@ class TestQuestion(db.Model):
     options = db.Column(db.JSON)  # {'a': 'вариант1', 'b': 'вариант2'}
     correct_answer = db.Column(db.String(1), nullable=False)  # 'a', 'b' и т.д.
 
+    def __repr__(self):
+        return 'TestQuestion %r' % self.id
+
 class TestResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -126,6 +134,12 @@ class TestResult(db.Model):
     score = db.Column(db.Integer)
     total_questions = db.Column(db.Integer)
     completed_at = db.Column(db.DateTime, default=datetime.now)
+
+    user = db.relationship('Users', backref='test_results')
+    test = db.relationship('Test', backref='result_relations')
+
+    def __repr__(self):
+        return 'TestResult %r' % self.id
 
 
 
@@ -185,6 +199,168 @@ def about():
 def auth():
     session.pop('name', None)
     return render_template("auth.html")
+
+
+@app.route('/tests')
+def tests_list():
+    tests = Test.query.all()
+    return render_template("tests.html", tests=tests)
+
+@app.route('/test/<int:test_id>')
+def take_test(test_id):
+    if not 'name' in session:
+        flash("Для прохождения теста необходимо войти", "warning")
+        return redirect(url_for('auth'))
+    
+    test = Test.query.get_or_404(test_id)
+    questions = TestQuestion.query.filter_by(test_id=test_id).all()
+    return render_template("test.html", test=test, questions=questions)
+
+@app.route('/api/submit-test', methods=['POST'])
+def submit_test():
+    try:
+        data = request.get_json()
+        user_id = Users.query.filter_by(email=session['name']).first().id
+        test_id = data['test_id']
+        answers = data['answers']
+        
+        questions = TestQuestion.query.filter_by(test_id=test_id).all()
+        total = len(questions)
+        correct = 0
+        
+        for q in questions:
+            if str(q.id) in answers and answers[str(q.id)] == q.correct_answer:
+                correct += 1
+        
+        # Сохраняем результат
+        result = TestResult(
+            user_id=user_id,
+            test_id=test_id,
+            score=correct,
+            total_questions=total
+        )
+        db.session.add(result)
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "score": correct,
+            "total": total,
+            "percent": int((correct / total) * 100)
+        })
+    
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route('/admin/tests')
+def admin_tests():
+    if not ('name' in session and Users.query.filter_by(email=session['name']).first().root == 1):
+        abort(403)
+    tests = Test.query.all()
+    return render_template("admin_tests.html", tests=tests)
+
+@app.route('/admin/test/new', methods=['GET', 'POST'])
+def new_test():
+    if not ('name' in session and Users.query.filter_by(email=session['name']).first().root == 1):
+        abort(403)
+    
+    if request.method == 'POST':
+        try:
+            test = Test(
+                title=request.form.get('title'),
+                description=request.form.get('description')
+            )
+            db.session.add(test)
+            db.session.commit()
+            flash('Тест создан! Теперь добавьте вопросы.', 'success')
+            return redirect(url_for('edit_test', test_id=test.id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ошибка при создании теста: {str(e)}', 'danger')
+    
+    return render_template("edit_test.html", test=None)
+
+@app.route('/admin/test/edit/<int:test_id>', methods=['GET', 'POST'])
+def edit_test(test_id):
+    if not ('name' in session and Users.query.filter_by(email=session['name']).first().root == 1):
+        abort(403)
+    
+    test = Test.query.get_or_404(test_id)
+    questions = TestQuestion.query.filter_by(test_id=test_id).order_by(TestQuestion.id).all()
+    
+    if request.method == 'POST':
+        if 'save_test' in request.form:
+            try:
+                test.title = request.form.get('title')
+                test.description = request.form.get('description')
+                db.session.commit()
+                flash('Тест обновлен!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Ошибка при обновлении теста: {str(e)}', 'danger')
+        
+        elif 'add_question' in request.form:
+            try:
+                question = TestQuestion(
+                    test_id=test_id,
+                    question=request.form.get('question'),
+                    code_snippet=request.form.get('code_snippet'),
+                    options={
+                        'a': request.form.get('option_a'),
+                        'b': request.form.get('option_b'),
+                        'c': request.form.get('option_c'),
+                        'd': request.form.get('option_d')
+                    },
+                    correct_answer=request.form.get('correct_answer')
+                )
+                db.session.add(question)
+                db.session.commit()
+                flash('Вопрос добавлен!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Ошибка при добавлении вопроса: {str(e)}', 'danger')
+        
+        return redirect(url_for('edit_test', test_id=test_id))
+    
+    return render_template("edit_test.html", test=test, questions=questions)
+
+@app.route('/admin/test/delete/<int:test_id>', methods=['POST'])
+def delete_test(test_id):
+    if not ('name' in session and Users.query.filter_by(email=session['name']).first().root == 1):
+        abort(403)
+    
+    test = Test.query.get_or_404(test_id)
+    try:
+        # Удаляем связанные вопросы и результаты
+        TestQuestion.query.filter_by(test_id=test_id).delete()
+        TestResult.query.filter_by(test_id=test_id).delete()
+        db.session.delete(test)
+        db.session.commit()
+        flash('Тест и все связанные данные удалены!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении теста: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_tests'))
+
+@app.route('/admin/question/delete/<int:question_id>', methods=['POST'])
+def delete_question(question_id):
+    if not ('name' in session and Users.query.filter_by(email=session['name']).first().root == 1):
+        abort(403)
+    
+    question = TestQuestion.query.get_or_404(question_id)
+    test_id = question.test_id
+    try:
+        db.session.delete(question)
+        db.session.commit()
+        flash('Вопрос удален!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении вопроса: {str(e)}', 'danger')
+    
+    return redirect(url_for('edit_test', test_id=test_id))
+
 
 
 @app.route('/login', methods=['POST'])
@@ -464,6 +640,17 @@ def profile():
         .limit(10)\
         .all()
     
+    test_results = TestResult.query.filter_by(user_id=user_id)\
+        .join(Test)\
+        .order_by(TestResult.completed_at.desc())\
+        .all()
+    
+    # Группируем результаты по тестам (последний результат для каждого теста)
+    latest_test_results = {}
+    for result in test_results:
+        if result.test_id not in latest_test_results:
+            latest_test_results[result.test_id] = result
+    
     return render_template("profile.html",
         progress_percent=progress_percent,
         completed_lessons=completed_lessons,
@@ -471,6 +658,7 @@ def profile():
         recent_solutions=recent_solutions,
         lessons_progress=lessons_progress,
         now=datetime.now,
+        test_results=test_results,
         user=user
     )
 
