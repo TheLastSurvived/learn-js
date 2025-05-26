@@ -11,6 +11,10 @@ import uuid
 import re
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from flask_migrate import Migrate
+import subprocess
+import os
+import tempfile
 
 
 app = Flask(__name__)
@@ -23,11 +27,12 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 db = SQLAlchemy(app)
 ckeditor = CKEditor(app)
 CORS(app)
-
+migrate = Migrate(app, db)
 
 CORS(app, resources={
     r"/api/*": {"origins": "*"},  
-    r"/lesson/*": {"origins": "*"}
+    r"/lesson/*": {"origins": "*"}, 
+    r"/task/*": {"origins": "*"}
 })
 
 
@@ -52,26 +57,38 @@ class Lesson(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    task = db.Column(db.Text, nullable=False)
-    solution = db.Column(db.Text, nullable=False)
 
     userSolution = db.relationship('UserSolution', backref='lesson', lazy=True)
+    tasks = db.relationship('Task', backref='lesson', lazy=True)
     
     def __repr__(self):
             return 'Lesson %r' % self.id
+    
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.Text, nullable=False)
+    solution = db.Column(db.Text, nullable=False)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'))
+
+    def __repr__(self):
+            return 'Lesson %r' % self.id
+
     
 
 class UserSolution(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'))
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'))  # Добавляем связь с заданием
     code = db.Column(db.Text)
     submitted_at = db.Column(db.DateTime, default=datetime.now)
     is_correct = db.Column(db.Boolean)
-
+    
+    task = db.relationship('Task', backref='solutions')  # Добавляем связь
     
     def __repr__(self):
-            return 'User Solution %r' % self.id
+        return 'User Solution %r' % self.id
 
 
 class Comment(db.Model):
@@ -87,6 +104,30 @@ class Comment(db.Model):
     def __repr__(self):
         return 'Comment %r' % self.id
     
+
+class Test(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    questions = db.relationship('TestQuestion', backref='test', lazy=True)
+
+class TestQuestion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    test_id = db.Column(db.Integer, db.ForeignKey('test.id'))
+    question = db.Column(db.Text, nullable=False)
+    code_snippet = db.Column(db.Text)
+    options = db.Column(db.JSON)  # {'a': 'вариант1', 'b': 'вариант2'}
+    correct_answer = db.Column(db.String(1), nullable=False)  # 'a', 'b' и т.д.
+
+class TestResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    test_id = db.Column(db.Integer, db.ForeignKey('test.id'))
+    score = db.Column(db.Integer)
+    total_questions = db.Column(db.Integer)
+    completed_at = db.Column(db.DateTime, default=datetime.now)
+
+
 
 class AdminIndex(AdminIndexView):
     @expose('/', methods=['GET', 'POST'])
@@ -109,7 +150,13 @@ class CommentView(ModelView):
 class SolutionView(ModelView):
     column_display_pk = True 
     column_hide_backrefs = False
-    column_list = [ 'user_id', 'lesson_id', 'code', 'submitted_at', 'is_correct']
+    column_list = [ 'user_id', 'lesson_id', 'task_id', 'code', 'submitted_at', 'is_correct']
+
+
+class TaskView(ModelView):
+    column_display_pk = True 
+    column_hide_backrefs = False
+    column_list = [ 'task', 'solution', 'lesson_id']
 
 
 admin = Admin(app, name='JS учебник',index_view=AdminIndex())
@@ -117,6 +164,10 @@ admin.add_view(ModelView(Users, db.session))
 admin.add_view(ModelView(Lesson, db.session))
 admin.add_view(SolutionView(UserSolution, db.session))
 admin.add_view(CommentView(Comment, db.session))
+admin.add_view(TaskView(Task, db.session))
+admin.add_view(ModelView(Test, db.session))
+admin.add_view(ModelView(TestQuestion, db.session))
+admin.add_view(ModelView(TestResult, db.session))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -209,44 +260,77 @@ def lessons():
 @app.route('/lesson/<int:id>', methods=['GET', 'POST'])
 def lesson(id):
     if not 'name' in session:
-        flash("Для продолжения  необходимо войти!", category="success")
+        flash("Для продолжения необходимо войти!", category="success")
         return redirect('/auth')
-
-
 
     less = Lesson.query.get(id)
     if not less:
         abort(404)
-    count = Lesson.query.count()
+    
     comments = Comment.query.filter_by(lesson_id=id).order_by(Comment.created_at.desc()).all()
-    prev_lesson = Lesson.query.filter(Lesson.id < id)\
-                            .order_by(Lesson.id.desc()).first()
-    
-    
-    next_lesson = Lesson.query.filter(Lesson.id > id)\
-                            .order_by(Lesson.id.asc()).first()
-    
+    prev_lesson = Lesson.query.filter(Lesson.id < id).order_by(Lesson.id.desc()).first()
+    next_lesson = Lesson.query.filter(Lesson.id > id).order_by(Lesson.id.asc()).first()
     total_user = Users.query.filter_by(email=session['name']).first()
 
+    # Получаем все задания для урока
+    tasks = Task.query.filter_by(lesson_id=id).all()
 
-    existing_solution = UserSolution.query.filter_by(
-            user_id=total_user.id,
-            lesson_id=id
-        ).first()
 
+    all_tasks_completed = True
+    if 'name' in session:
+        user = Users.query.filter_by(email=session['name']).first()
+        for task in tasks:
+            solution = UserSolution.query.filter_by(
+                user_id=user.id,
+                lesson_id=id,
+                task_id=task.id,
+                is_correct=True
+            ).first()
+            if not solution:
+                all_tasks_completed = False
+                break
+   
 
     if request.method == 'POST':
-        less.title = request.form.get('title')
-        less.description = request.form.get('description')
-        less.task = request.form.get('task')
-        less.solution = request.form.get('solution')
-        less.content = request.form.get('ckeditor')
-        db.session.commit()
-        flash("Урок обновлен!", category="success")
-        return redirect(url_for("lesson", id=less.id, index=index))
+        # Обработка добавления нового задания
+        if 'new_task' in request.form:
+            task_text = request.form.get('task')
+            solution_text = request.form.get('solution')
+            if task_text and solution_text:
+                new_task = Task(task=task_text, solution=solution_text, lesson_id=id)
+                db.session.add(new_task)
+                db.session.commit()
+                flash("Задание добавлено!", category="success")
+        
+        # Обработка редактирования урока
+        elif 'edit_lesson' in request.form:
+            less.title = request.form.get('title')
+            less.description = request.form.get('description')
+            less.content = request.form.get('ckeditor')
+            db.session.commit()
+            flash("Урок обновлен!", category="success")
 
-    return render_template("lesson.html",less=less,count=count,id=id,prev_lesson=prev_lesson,
-                         next_lesson=next_lesson,existing_solution=existing_solution,comments=comments)
+        elif 'edit_task' in request.form:
+            id_task = request.form.get('task_id')
+            task = Task.query.get(id_task)
+            task.task = request.form.get('task')
+            task.solution = request.form.get('solution')
+            db.session.commit()
+            flash("Задание обновлено!", category="success")
+        
+        return redirect(url_for("lesson", id=id))
+
+    return render_template("lesson.html", less=less, prev_lesson=prev_lesson,
+                         next_lesson=next_lesson, comments=comments, tasks=tasks, all_tasks_completed=all_tasks_completed)
+
+
+@app.route('/delete-task/<int:id_task>/<int:id_article>')
+def delete_task(id_task,id_article):
+    obj = Task.query.filter_by(id=id_task).first()
+    db.session.delete(obj)
+    db.session.commit()
+    flash("Задание удалёно!", category="warning")
+    return redirect(url_for("lesson", id=id_article))
 
 
 @app.route('/delete-lesson/<int:id>')
@@ -257,17 +341,17 @@ def delete_article(id):
     flash("Урок удалён!", category="warning")
     return redirect('/lessons')
 
+    
 
-@app.route('/api/lesson//<int:id>', methods=['GET'])
+@app.route('/api/task/<int:id>', methods=['GET'])
 def get_users(id):
-    lesson = Lesson.query.get(id)
+    task = Task.query.get(id)
     
     response = jsonify({
-        'id': lesson.id,
-        'title': lesson.title,
-        'content': lesson.content,
-        'task': lesson.task,
-        'solution': lesson.solution
+        'id': task.id,
+        'task': task.task,
+        'solution': task.solution,
+        'lesson_id': task.lesson_id
     })
     
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -278,14 +362,14 @@ def get_users(id):
 def save_solution():
     try:
         data = request.get_json()
-        required_fields = ['user_id', 'lesson_id', 'code', 'is_correct']
-
+        required_fields = ['user_id', 'lesson_id', 'task_id', 'code', 'is_correct']
+       
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Missing required fields"}), 400
 
         existing_solution = UserSolution.query.filter_by(
             user_id=data['user_id'],
-            lesson_id=data['lesson_id']
+            task_id=data['task_id']
         ).first()
 
         if existing_solution:
@@ -297,6 +381,7 @@ def save_solution():
             new_solution = UserSolution(
                 user_id=data['user_id'],
                 lesson_id=data['lesson_id'],
+                task_id=data['task_id'],
                 code=data['code'],
                 is_correct=data['is_correct'],
                 submitted_at=datetime.now()
@@ -318,7 +403,7 @@ def save_solution():
             "status": "error",
             "message": str(e)
         }), 500
-    
+
 
 def normalize_code(code):
     code = re.sub(r'\s+', ' ', code) 
@@ -330,19 +415,64 @@ def normalize_code(code):
 def profile():
     if not 'name' in session:
         abort(401)
-    user_id = Users.query.filter_by(email=session['name']).first().id
-    total_lessons = Lesson.query.count()
-    completed_lessons = UserSolution.query.filter_by(
-        user_id=user_id,
-        is_correct=True
-    ).distinct(UserSolution.lesson_id).count()
-
+    
+    user = Users.query.filter_by(email=session['name']).first()
+    user_id = user.id
+    
+    # Получаем все уроки
+    all_lessons = Lesson.query.all()
+    total_lessons = len(all_lessons)
+    
+    # Считаем пройденные уроки (где выполнены ВСЕ задания)
+    completed_lessons = 0
+    lessons_progress = []
+    
+    for lesson in all_lessons:
+        tasks = Task.query.filter_by(lesson_id=lesson.id).all()
+        total_tasks = len(tasks)
+        
+        if total_tasks == 0:
+            continue
+            
+        completed_tasks = 0
+        for task in tasks:
+            solution = UserSolution.query.filter_by(
+                user_id=user_id,
+                lesson_id=lesson.id,
+                task_id=task.id,
+                is_correct=True
+            ).first()
+            if solution:
+                completed_tasks += 1
+                
+        is_lesson_completed = (completed_tasks == total_tasks)
+        if is_lesson_completed:
+            completed_lessons += 1
+            
+        lessons_progress.append({
+            'lesson': lesson,
+            'completed_tasks': completed_tasks,
+            'total_tasks': total_tasks,
+            'is_completed': is_lesson_completed
+        })
+    
     progress_percent = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
-    recent_solutions = UserSolution.query.filter_by(user_id=user_id).join(Lesson).all()
+    
+    # Последние решения (ограничим 10 последними)
+    recent_solutions = UserSolution.query.filter_by(user_id=user_id)\
+        .order_by(UserSolution.submitted_at.desc())\
+        .limit(10)\
+        .all()
+    
     return render_template("profile.html",
-                         progress_percent=progress_percent,
-                         completed_lessons=completed_lessons,
-                         total_lessons=total_lessons,recent_solutions=recent_solutions, now = datetime.now)
+        progress_percent=progress_percent,
+        completed_lessons=completed_lessons,
+        total_lessons=total_lessons,
+        recent_solutions=recent_solutions,
+        lessons_progress=lessons_progress,
+        now=datetime.now,
+        user=user
+    )
 
 
 @app.route('/edit_profile', methods=['POST'])

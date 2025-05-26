@@ -48,7 +48,7 @@
                             <i class="bi bi-star-fill me-1"></i> Новичок
                         </div>
                     {% elif 30 <= days_on_site < 180 %}
-                        <div class="badge bg-success-light text-success rounded-pill p-2">
+                        <div class="badge bg-primary-light text-primary rounded-pill p-2">
                             <i class="bi bi-award-fill me-1"></i> Опытный
                         </div>
                     {% elif 180 <= days_on_site < 365 %}
@@ -98,10 +98,11 @@
 <div class="container my-5">
     <div class="row">
         <div class="col-lg-12 mx-auto">
-            <div class="card border-0 shadow-sm">
+            <!-- Общий прогресс -->
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h4 class="card-title mb-4">
-                        <i class="bi bi-graph-up text-primary me-2"></i> Ваш прогресс обучения
+                        <i class="bi bi-graph-up text-primary me-2"></i> Общий прогресс
                     </h4>
                     
                     <div class="progress mb-3" style="height: 10px;">
@@ -117,20 +118,94 @@
                         <span class="text-muted">{{ progress_percent }}% завершено</span>
                         <span class="text-primary fw-bold">{{ completed_lessons }}/{{ total_lessons }} уроков</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Детальный прогресс по урокам -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">
+                        <i class="bi bi-list-check text-primary me-2"></i> Прогресс по урокам
+                    </h4>
                     
-                    <!-- Дополнительная информация о прогрессе -->
-                    <div class="mt-4">
-                        <h5 class="mb-3">Последние решенные уроки:</h5>
-                        <ul class="list-group">
-                            {% for solution in recent_solutions %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                 <a href="/lesson/{{solution.lesson.id}}">{{ solution.lesson.title }}</a>
-                                <span class="badge bg-{{ 'success' if solution.is_correct else 'danger' }}">
-                                    {{ 'Правильно' if solution.is_correct else 'Неправильно' }}
-                                </span>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                    <div class="accordion" id="lessonsAccordion">
+                        {% for lp in lessons_progress %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ lp.lesson.id }}">
+                                <button class="accordion-button {% if not lp.is_completed %}collapsed{% endif %}" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ lp.lesson.id }}" 
+                                        aria-expanded="{% if lp.is_completed %}true{% else %}false{% endif %}" 
+                                        aria-controls="collapse{{ lp.lesson.id }}">
+                                    <div class="d-flex justify-content-between w-100 me-3">
+                                        <span>{{ lp.lesson.title }}</span>
+                                        <span class="badge bg-{% if lp.is_completed %}success{% else %}secondary{% endif %}">
+                                            {{ lp.completed_tasks }}/{{ lp.total_tasks }} заданий
+                                        </span>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse{{ lp.lesson.id }}" 
+                                 class="accordion-collapse collapse {% if lp.is_completed %}show{% endif %}" 
+                                 aria-labelledby="heading{{ lp.lesson.id }}" 
+                                 data-bs-parent="#lessonsAccordion">
+                                <div class="accordion-body">
+                                    <div class="progress mb-2" style="height: 5px;">
+                                        <div class="progress-bar bg-{% if lp.is_completed %}success{% else %}info{% endif %}" 
+                                             style="width: {{ (lp.completed_tasks / lp.total_tasks) * 100 }}%"></div>
+                                    </div>
+                                    <a href="/lesson/{{ lp.lesson.id }}" class="btn btn-sm btn-outline-primary">
+                                        Перейти к уроку
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Последние решения -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">
+                        <i class="bi bi-clock-history text-primary me-2"></i> Последние решения
+                    </h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Урок</th>
+                                    <th>Задание</th>
+                                    <th>Дата</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for solution in recent_solutions %}
+                                <tr>
+                                    <td>
+                                        <a href="/lesson/{{ solution.lesson.id }}">{{ solution.lesson.title }}</a>
+                                    </td>
+                                    <td>
+                                        {% if solution.task %}
+                                            Задание #{{ solution.task.id }}
+                                        {% else %}
+                                            (задание удалено)
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ solution.submitted_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if solution.is_correct %}success{% else %}danger{% endif %}">
+                                            {{ 'Правильно' if solution.is_correct else 'Неправильно' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -9,13 +9,13 @@
   <div class="row">
     <div class="col-lg-10 mx-auto">
       <!-- Уведомление о пройденном уроке -->
-      {% if existing_solution and existing_solution.is_correct %}
+      {% if all_tasks_completed and tasks  %}
       <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
         <div class="d-flex align-items-center">
           <i class="bi bi-check-circle-fill me-2 fs-4"></i>
           <div>
             <h5 class="alert-heading mb-1">Урок пройден!</h5>
-            <p class="mb-0">Вы успешно выполнили это задание.</p>
+            <p class="mb-0">Вы успешно выполнили все задания.</p>
           </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -34,6 +34,9 @@
       <!-- Кнопки управления для админа -->
       {% if 'name' in session and active_user.root == 1 %}
       <div class="d-flex gap-2 mb-4">
+        <button type="button" class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+          <i class="bi bi-code-square me-1"></i> Добавить задание
+        </button>
         <button type="button" class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#editLessonModal">
           <i class="bi bi-pencil-square me-1"></i> Редактировать
         </button>
@@ -42,7 +45,6 @@
         </a>
       </div>
 
-      <!-- Модальное окно редактирования -->
       <div class="modal fade" id="editLessonModal" tabindex="-1" aria-labelledby="editLessonModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
           <div class="modal-content">
@@ -65,18 +67,10 @@
                     <label class="form-label">Содержание урока</label>
                     {{ ckeditor.create(value=less.content) }}
                   </div>
-                  <div class="col-md-6">
-                    <label for="lessonTask" class="form-label">Задание</label>
-                    <textarea class="form-control" id="lessonTask" rows="4" name="task" style="border-radius: 15px;">{{ less.task }}</textarea>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="lessonSolution" class="form-label">Решение</label>
-                    <textarea class="form-control" id="lessonSolution" name="solution" rows="4" style="border-radius: 15px;">{{ less.solution }}</textarea>
-                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
-                  <button type="submit" class="btn btn-primary rounded-pill px-4">
+                  <button type="submit" class="btn btn-primary rounded-pill px-4" name="edit_lesson">
                     <i class="bi bi-save me-1"></i> Сохранить изменения
                   </button>
                 </div>
@@ -85,6 +79,39 @@
           </div>
         </div>
       </div>
+
+      <!-- Модальное окно задания -->
+      <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModal" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <h2 class="modal-title fs-5" id="addTaskModalLabel"><i class="bi bi-journal-plus me-2"></i>Добавить задание</h2>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method="post" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="taskText" class="form-label">Текст задания</label>
+                        <textarea class="form-control" id="taskText" name="task" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="solutionText" class="form-label">Решение</label>
+                        <textarea class="form-control" id="solutionText" name="solution" rows="3" required></textarea>
+                    </div>
+                    
+                    <button type="submit" name="new_task" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Добавить задание
+                    </button>
+                     <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      
       {% endif %}
 
       <!-- Заголовок урока -->
@@ -92,6 +119,7 @@
         <div class="badge bg-primary rounded-pill px-3 py-2 me-3">Урок</div>
         <h1 class="mb-0">{{ less.title }}</h1>
       </div>
+        
       
       <p class="lead text-muted mb-4">{{ less.description }}</p>
 
@@ -111,13 +139,27 @@
       </div>
 
       <!-- Карточка с заданием -->
+       {%for task in tasks%}
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-gradient-success text-white rounded-top">
           <div class="d-flex align-items-center">
             <i class="bi bi-code-square me-2 fs-4"></i>
-            <h5 class="mb-0">Практическое задание</h5>
+            <h5 class="mb-0">Практическое задание №{{loop.index}}</h5>
           </div>
         </div>
+        <div class="d-flex m-3">
+          <button type="button" class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal{{ task.id }}">
+          <i class="bi bi-pencil-square me-1"></i> Редактировать
+        </button>
+          <a href="/delete-task/{{ task.id }}/{{ less.id }}" class="btn btn-danger rounded-pill shadow-sm mx-2" onclick="return confirm('Вы уверены, что хотите удалить это задание?')">
+            <i class="bi bi-trash me-1"></i> Удалить
+          </a>
+        </div>
+
+
+       
+      </div>
+        
         <div class="card-body">
           <!-- Задание -->
           <div class="task-card bg-success bg-opacity-10 p-4 rounded-3 border border-success border-opacity-25 mb-4">
@@ -125,7 +167,7 @@
               <i class="bi bi-lightbulb text-success me-2 fs-4"></i>
               <h5 class="mb-0 text-success">Ваша задача</h5>
             </div>
-            {% autoescape false %} {{ less.task }} {% endautoescape %}
+            {% autoescape false %} {{ task.task }} {% endautoescape %}
           </div>
 
           <!-- Редактор кода -->
@@ -134,37 +176,30 @@
               <label for="codeEditor" class="form-label fw-bold">
                 <i class="bi bi-terminal me-1"></i> Редактор кода
               </label>
-              <button class="btn btn-sm btn-outline-secondary rounded-pill" id="resetCode">
+              <button class="btn btn-sm btn-outline-secondary rounded-pill " id="resetCode{{ task.id }}">
                 <i class="bi bi-arrow-counterclockwise me-1"></i> Сбросить
               </button>
+              <script>
+              // Сброс кода
+                document.getElementById('resetCode{{ task.id }}').addEventListener('click', function(e) {
+                  e.preventDefault();
+                  document.getElementById('codeEditor{{ task.id }}').value = '';
+                });
+            </script>
             </div>
-            <textarea class="form-control font-monospace" id="codeEditor" rows="10" style="border-radius: 15px; font-family: 'Fira Code', monospace;"></textarea>
+            <textarea class="form-control font-monospace code-editor" id="codeEditor{{ task.id }}" rows="10" style="border-radius: 15px; font-family: 'Fira Code', monospace;"></textarea>
             <input type="hidden" value="{{ less.id }}" id="idLesson">
+            <input type="hidden" value="{{ task.id }}" id="idtask">
             <input type="hidden" value="{{ active_user.id if active_user else '' }}" id="idUser">
           </div>
 
-          <!-- Пример решения -->
-          <div class="alert alert-info mb-4">
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-info-circle-fill me-2"></i>
-              <h5 class="mb-0">Важно!</h5>
-            </div>
-            <p>Ваш код должен возвращать результат в переменной <code>result</code>.</p>
-            <div class="bg-dark text-light p-3 rounded-3 mt-2">
-              <pre class="mb-0"><code class="language-javascript">
-// Пример решения
-const a = 5;
-const b = 10;
-const result = a + b; // Возвращает 15
-              </code></pre>
-            </div>
-          </div>
+         
 
           <!-- Кнопка проверки и результаты -->
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-success rounded-pill px-4 shadow-sm" id="checkCode">
-              <i class="bi bi-play-fill me-1"></i> Проверить решение
-            </button>
+           <button class="btn btn-success rounded-pill px-4 shadow-sm check-code" id="checkCode{{ task.id }}" data-task-id="{{ task.id }}">
+            <i class="bi bi-play-fill me-1"></i> Проверить решение
+          </button>
             
             <div class="d-flex align-items-center">
               <div class="spinner-border text-primary d-none" id="loadingSpinner" role="status">
@@ -173,16 +208,16 @@ const result = a + b; // Возвращает 15
             </div>
           </div>
 
-          <div class="output-container mb-4 d-none" id="outputContainer">
+          <div class="output-container mb-4 d-none" id="outputContainer{{ task.id }}">
             <h5 class="d-flex align-items-center mb-3">
               <i class="bi bi-terminal me-2"></i> Результат выполнения:
             </h5>
-            <div class="bg-dark text-light p-3 rounded-3" id="output">
+            <div class="bg-dark text-light p-3 rounded-3" id="output{{ task.id }}" >
               <!-- Здесь будет вывод кода -->
             </div>
           </div>
 
-          <div class="alert alert-success d-none align-items-center" id="successAlert" role="alert">
+          <div class="alert alert-success d-none align-items-center" id="successAlert{{ task.id }}" role="alert">
             <i class="bi bi-check-circle-fill fs-4 me-3"></i>
             <div>
               <h5 class="alert-heading mb-1">Поздравляем!</h5>
@@ -190,7 +225,7 @@ const result = a + b; // Возвращает 15
             </div>
           </div>
 
-          <div class="alert alert-danger d-none align-items-center" id="dangerAlert" role="alert">
+          <div class="alert alert-danger d-none align-items-center" id="dangerAlert{{ task.id }}" role="alert">
             <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
             <div>
               <h5 class="alert-heading mb-1">Ошибка!</h5>
@@ -198,7 +233,39 @@ const result = a + b; // Возвращает 15
             </div>
           </div>
         </div>
-      </div>
+     
+
+
+       <div class="modal fade" id="editTaskModal{{ task.id }}" tabindex="-1" aria-labelledby="editTaskModal{{ task.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <h2 class="modal-title fs-5" id="editTaskModalLabel"><i class="bi bi-journal-plus me-2"></i>Редактировать задание №{{loop.index}}</h2>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <form method="post" class="needs-validation" novalidate>
+                <div class="mb-3">
+                  <label for="taskText{{ task.id }}" class="form-label">Текст задания</label>
+                  <textarea class="form-control" id="taskText{{ task.id }}" name="task" rows="3" required>{{ task.task }}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="solutionText{{ task.id }}" class="form-label">Решение</label>
+                  <textarea class="form-control" id="solutionText{{ task.id }}" name="solution" rows="3" required>{{ task.solution }}</textarea>
+                </div>
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" name="edit_task" class="btn btn-primary">
+                  <i class="bi bi-save me-1"></i> Редактировать задание
+                </button>
+              </form>
+            </div>
+            </div>
+          </div>
+        </div>
+
+
+      {%endfor%}
 
       <!-- Навигация между уроками -->
       <div class="d-flex justify-content-between mt-5">
@@ -222,6 +289,25 @@ const result = a + b; // Возвращает 15
         </button>
         {% endif %}
       </div>
+
+{%if tasks%}
+       <!-- Пример решения -->
+          <div class="alert alert-info my-4">
+            <div class="d-flex align-items-center mb-2">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <h5 class="mb-0">Важно!</h5>
+            </div>
+            <p>Ваш код должен возвращать результат в переменной <code>result</code>.</p>
+            <div class="bg-dark text-light p-3 rounded-3 mt-2">
+              <pre class="mb-0"><code class="language-javascript">
+// Пример решения
+const a = 5;
+const b = 10;
+const result = a + b; // Возвращает 15
+              </code></pre>
+            </div>
+          </div>
+{%endif%}
 
       <!-- Секция комментариев -->
       <div class="card border-0 shadow-sm mt-5">
@@ -296,16 +382,6 @@ const result = a + b; // Возвращает 15
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
 
-<script>
-  // Инициализация редактора кода
-  document.addEventListener('DOMContentLoaded', function() {
-    // Сброс кода
-    document.getElementById('resetCode').addEventListener('click', function(e) {
-      e.preventDefault();
-      document.getElementById('codeEditor').value = '';
-    });
-    
-   
-  });
-</script>
+
+
 {% endblock %}

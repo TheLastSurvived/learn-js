@@ -48,6 +48,11 @@
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" href="/tests">
+                  <i class="bi bi-card-checklist me-1"></i> Тесты
+              </a>
+          </li>
+            <li class="nav-item">
               <a class="nav-link" href="/about">
                 <i class="bi bi-info-circle me-1"></i> О нас
               </a>
@@ -117,6 +122,7 @@
             <ul class="list-unstyled">
               <li class="mb-2"><a href="/" class="text-white-50 text-decoration-none">Главная</a></li>
               <li class="mb-2"><a href="/lessons" class="text-white-50 text-decoration-none">Уроки</a></li>
+              <li class="mb-2"><a href="/tests" class="text-white-50 text-decoration-none">Тесты</a></li>
               <li class="mb-2"><a href="/about" class="text-white-50 text-decoration-none">О нас</a></li>
               <li class="mb-2"><a href="/auth" class="text-white-50 text-decoration-none">Вход</a></li>
             </ul>
@@ -159,9 +165,11 @@
     <!-- Bootstrap JS + Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Свой JS -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+     <!--
+    <script src="{{ url_for('static', filename='js/task-checker.js') }}"></script>
+   -->
     <script>
       // Кнопка "Наверх"
       window.addEventListener('scroll', function() {

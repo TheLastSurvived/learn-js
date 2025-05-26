@@ -37,3 +37,4 @@ visitor
 Werkzeug           
 WTForms 
 flask-cors
+flask-migrate
