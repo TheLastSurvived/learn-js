@@ -385,14 +385,31 @@ def regestration():
             surname = request.form.get('surname')
             email = request.form.get('email')
             password = request.form.get('password')
+            
+            # Валидация email
+            if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+                flash("Некорректный формат email", category="warning")
+                return redirect(url_for("auth"))
+                
+            # Валидация пароля (минимум 8 символов)
+            if len(password) < 8:
+                flash("Пароль должен содержать минимум 8 символов", category="warning")
+                return redirect(url_for("auth"))
+            
+            # Проверка на существующий email
+            existing_user = Users.query.filter_by(email=email).first()
+            if existing_user:
+                flash("Этот email уже зарегистрирован", category="warning")
+                return redirect(url_for("auth"))
+            
             user = Users(name=name,surname=surname,email=email,password=md5(password.encode()).hexdigest())
             db.session.add(user)
             db.session.commit()
             session['name'] = Users.query.filter_by(email=email).first().email
             flash("Регистрация прошла успешно!", category="success")
             return redirect(url_for("index"))
-        except:
-            flash("Произошла ошибка! Проверьте введенные данные!", category="warning")
+        except Exception as e:
+            flash(f"Произошла ошибка!", category="warning")
             db.session.rollback()
             return redirect(url_for("auth"))
 

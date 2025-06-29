@@ -56,7 +56,7 @@
                         
                         <!-- Вкладка регистрации -->
                         <div class="tab-pane fade" id="register" role="tabpanel">
-                            <form action="{{url_for('regestration')}}" method="post">
+                            <form action="{{url_for('regestration')}}" method="post" onsubmit="return validateRegisterForm()">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="regName" class="form-label">Имя</label>
@@ -79,14 +79,17 @@
                                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                         <input type="email" class="form-control" id="regEmail" name="email" placeholder="example@mail.com" required>
                                     </div>
+                                    <small class="text-muted">Пример: example@mail.com</small>
+                                    <div class="invalid-feedback" id="emailError"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="regPassword" class="form-label">Пароль</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                        <input type="password" class="form-control" id="regPassword" name="password" placeholder="••••••••" required>
+                                        <input type="password" class="form-control" id="regPassword" name="password" placeholder="••••••••" required minlength="8">
                                     </div>
-                                    
+                                    <small class="text-muted">Минимум 8 символов</small>
+                                    <div class="invalid-feedback" id="passwordError"></div>
                                 </div>
                             
                                 <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
@@ -100,4 +103,56 @@
         </div>
     </div>
 </div>
+
+<script>
+    function validateRegisterForm() {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        
+        // Проверка email
+        const emailRegex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+        if (!emailRegex.test(email)) {
+            emailError.textContent = 'Пожалуйста, введите корректный email';
+            document.getElementById('regEmail').classList.add('is-invalid');
+            return false;
+        } else {
+            document.getElementById('regEmail').classList.remove('is-invalid');
+        }
+        
+        // Проверка пароля
+        if (password.length < 8) {
+            passwordError.textContent = 'Пароль должен содержать минимум 8 символов';
+            document.getElementById('regPassword').classList.add('is-invalid');
+            return false;
+        } else {
+            document.getElementById('regPassword').classList.remove('is-invalid');
+        }
+        
+        return true;
+    }
+    
+    // Валидация при вводе
+    document.getElementById('regEmail').addEventListener('input', function() {
+        const emailRegex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+        if (!emailRegex.test(this.value)) {
+            document.getElementById('emailError').textContent = 'Пожалуйста, введите корректный email';
+            this.classList.add('is-invalid');
+        } else {
+            document.getElementById('emailError').textContent = '';
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    document.getElementById('regPassword').addEventListener('input', function() {
+        if (this.value.length < 8) {
+            document.getElementById('passwordError').textContent = 'Пароль должен содержать минимум 8 символов';
+            this.classList.add('is-invalid');
+        } else {
+            document.getElementById('passwordError').textContent = '';
+            this.classList.remove('is-invalid');
+        }
+    });
+    </script>
 {% endblock %}
