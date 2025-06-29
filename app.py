@@ -386,9 +386,19 @@ def regestration():
             email = request.form.get('email')
             password = request.form.get('password')
             
-            # Валидация email
-            if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-                flash("Некорректный формат email", category="warning")
+            # Валидация имени и фамилии (только буквы)
+            name_regex = re.compile(r'^[a-zA-Zа-яА-ЯёЁ]+$')
+            if not name_regex.match(name):
+                flash("Имя должно содержать только буквы", category="warning")
+                return redirect(url_for("auth"))
+                
+            if not name_regex.match(surname):
+                flash("Фамилия должна содержать только буквы", category="warning")
+                return redirect(url_for("auth"))
+                
+            # Валидация email (должен содержать хотя бы одну букву перед @)
+            if not re.match(r'^[a-zA-Zа-яА-ЯёЁ][\w\.-]*@[\w\.-]+\.\w+$', email):
+                flash("Некорректный формат email (должен содержать буквы)", category="warning")
                 return redirect(url_for("auth"))
                 
             # Валидация пароля (минимум 8 символов)
@@ -406,7 +416,7 @@ def regestration():
             db.session.add(user)
             db.session.commit()
             session['name'] = Users.query.filter_by(email=email).first().email
-            flash("Регистрация прошла успешно!", category="success")
+            
             return redirect(url_for("index"))
         except Exception as e:
             flash(f"Произошла ошибка!", category="warning")

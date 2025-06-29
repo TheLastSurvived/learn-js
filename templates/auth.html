@@ -103,18 +103,50 @@
         </div>
     </div>
 </div>
-
 <script>
+    // Валидация имени и фамилии (только буквы)
+    document.getElementById('regName').addEventListener('input', function() {
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ]+$/;
+        if (!nameRegex.test(this.value)) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    document.getElementById('regSurname').addEventListener('input', function() {
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ]+$/;
+        if (!nameRegex.test(this.value)) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
     function validateRegisterForm() {
+        const name = document.getElementById('regName').value;
+        const surname = document.getElementById('regSurname').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
         const emailError = document.getElementById('emailError');
         const passwordError = document.getElementById('passwordError');
         
-        // Проверка email
-        const emailRegex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+        // Проверка имени и фамилии
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ]+$/;
+        if (!nameRegex.test(name)) {
+            alert('Имя должно содержать только буквы');
+            return false;
+        }
+        
+        if (!nameRegex.test(surname)) {
+            alert('Фамилия должна содержать только буквы');
+            return false;
+        }
+        
+        // Проверка email (должен содержать хотя бы одну букву)
+        const emailRegex = /^[a-zA-Zа-яА-ЯёЁ][\w\.-]*@[\w\.-]+\.\w+$/;
         if (!emailRegex.test(email)) {
-            emailError.textContent = 'Пожалуйста, введите корректный email';
+            emailError.textContent = 'Пожалуйста, введите корректный email (должен содержать буквы)';
             document.getElementById('regEmail').classList.add('is-invalid');
             return false;
         } else {
@@ -133,26 +165,16 @@
         return true;
     }
     
-    // Валидация при вводе
+    // Остальной код остается без изменений
     document.getElementById('regEmail').addEventListener('input', function() {
-        const emailRegex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+        const emailRegex = /^[a-zA-Zа-яА-ЯёЁ][\w\.-]*@[\w\.-]+\.\w+$/;
         if (!emailRegex.test(this.value)) {
-            document.getElementById('emailError').textContent = 'Пожалуйста, введите корректный email';
+            document.getElementById('emailError').textContent = 'Пожалуйста, введите корректный email (должен содержать буквы)';
             this.classList.add('is-invalid');
         } else {
             document.getElementById('emailError').textContent = '';
             this.classList.remove('is-invalid');
         }
     });
-    
-    document.getElementById('regPassword').addEventListener('input', function() {
-        if (this.value.length < 8) {
-            document.getElementById('passwordError').textContent = 'Пароль должен содержать минимум 8 символов';
-            this.classList.add('is-invalid');
-        } else {
-            document.getElementById('passwordError').textContent = '';
-            this.classList.remove('is-invalid');
-        }
-    });
-    </script>
+</script>
 {% endblock %}
