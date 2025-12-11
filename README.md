@@ -17,4 +17,5 @@ python app.py
 ```
 Далее перейти по локальному адресу. В Flask это обычно http://localhost:5000 или http://127.0.0.1:5000. 
 
-
+Есть на хостинге:
+https://learn-js-6ml6.onrender.com
